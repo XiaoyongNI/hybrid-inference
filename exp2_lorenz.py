@@ -20,8 +20,8 @@ args.test_samples = 3000
 print(args)
 
 
-sweep_samples = np.array([10000]) * 10
-epochs_arr = [20]
+sweep_samples = np.array([2]) * 10
+epochs_arr = [1]
 
 sweep_K = [args.taylor_K]
 
@@ -95,7 +95,7 @@ def hybrid(sigma, epochs, K=1, data=1000):
     args.learned = True
     args.epochs = epochs
     args.taylor_K=K
-    val, test = main.main_lorenz_hybrid(args, sigma, K=K, dt = 0.02)
+    val, test = main.main_lorenz_hybrid(args, sigma, K=K, dt = 0.02, plot_lorenz=True)
     return test
 
 
