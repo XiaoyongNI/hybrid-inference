@@ -16,7 +16,7 @@ lr_base = args.lr
 
 d_utils.init_folders(args.exp_name)
 d_utils.copy_file('exp2_lorenz.py', 'logs/%s/%s' % (args.exp_name, 'exp2_lorenz.py'))
-args.test_samples = 30
+args.test_samples = 3000
 print(args)
 
 
