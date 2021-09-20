@@ -20,7 +20,7 @@ args.test_samples = 3000
 print(args)
 
 
-sweep_samples = np.array([30000]) * 10
+sweep_samples = np.array([10000]) * 10
 epochs_arr = [50]
 
 sweep_K = [args.taylor_K]

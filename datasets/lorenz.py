@@ -19,7 +19,7 @@ class LORENZ(data.Dataset):
         self.max_len = max_len
         self.gnn_format = gnn_format
         self.sparse = sparse
-        self.lamb = 0.5
+        self.lamb = 1
         self.x0 = [1.0, 1.0, 1.0]
         self.H = np.diag([1]*3)
         self.R = np.diag([1]*3) * self.lamb ** 2
