@@ -21,7 +21,7 @@ print(args)
 
 
 sweep_samples = np.array([10000]) * 10
-epochs_arr = [50]
+epochs_arr = [20]
 
 sweep_K = [args.taylor_K]
 
