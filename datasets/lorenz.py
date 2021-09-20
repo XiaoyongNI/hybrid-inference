@@ -14,7 +14,7 @@ compact_path_001 = "temp/lorenz_001.pickle"
 
 
 class LORENZ(data.Dataset):
-    def __init__(self, partition='train', max_len=1000, tr_tt=1000, val_tt=1000, test_tt=1000, gnn_format=False, sparse=True, sample_dt=0.05, no_pickle=False):
+    def __init__(self, partition='train', max_len=3000, tr_tt=1000, val_tt=1000, test_tt=3000, gnn_format=False, sparse=True, sample_dt=0.02, no_pickle=False):
         self.partition = partition  # training set or test set
         self.max_len = max_len
         self.gnn_format = gnn_format

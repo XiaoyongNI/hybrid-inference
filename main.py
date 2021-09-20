@@ -50,21 +50,22 @@ def main_synthetic_hybrid(args, sigma=0.15, lamb=0.5, val_on_train=False):
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
     dataset_test = synthetic.SYNTHETIC(partition='test', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                         equations="acceleration", gnn_format=True)
+                                         equations="canonical", gnn_format=True)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
     dataset_train = synthetic.SYNTHETIC(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                        equations="acceleration", gnn_format=True)
+                                        equations="canonical", gnn_format=True)
     train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
 
     dataset_val = synthetic.SYNTHETIC(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                      equations="acceleration", gnn_format=True)
+                                      equations="canonical", gnn_format=True)
     val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
 
-    (A, H, Q, R) = synthetic.create_model_parameters_v(s2_x=sigma ** 2, s2_y=sigma ** 2, lambda2=lamb ** 2)
+    # (A, H, Q, R) = synthetic.create_model_parameters_v(s2_x=sigma ** 2, s2_y=sigma ** 2, lambda2=lamb ** 2)
+    (A, H, Q, R) = synthetic.create_model_parameters_canonical(r=1,q=1)
 
 
-    net = gnn.GNN_Kalman(args, A, H, Q, R, settings.x0_v, 0 * np.eye(len(settings.x0_v)), nf=args.nf,
+    net = gnn.GNN_Kalman(args, A, H, Q, R, dataset_train.x0,  dataset_train.P0, nf=args.nf,
                              prior=args.prior,  learned=args.learned, init=args.init, gamma=args.gamma).to(device)
     #print(net)
     optimizer = optim.Adam(net.parameters(), lr=args.lr)
@@ -133,7 +134,7 @@ def main_synhtetic_kalman(args, sigma=0.1, lamb=0.5, val_on_train=False, optimal
     return val_loss, test_loss
 
 
-def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.05, K=1, plot_lorenz=False):
+def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1, plot_lorenz=False):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
@@ -143,7 +144,7 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.05, K=1
     print("working on device %s" % device)
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-    dataset_test = lorenz.LORENZ(partition='test', max_len=5000, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+    dataset_test = lorenz.LORENZ(partition='test', max_len=3000, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
     dataset_train = lorenz.LORENZ(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
@@ -177,12 +178,12 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.05, K=1
     return min_val.item(), best_test.item()
 
 
-def main_lorenz_kalman(args, sigma=2, lamb=0.5, K=1, dt=0.05, val_on_train=False, plots=False):
+def main_lorenz_kalman(args, sigma=2, lamb=0.5, K=1, dt=0.02, val_on_train=False, plots=False):
     if val_on_train:
         dataset_train = lorenz.LORENZ(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples,
                                       test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
         loader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
-    dataset_test = lorenz.LORENZ(partition='test', max_len=5000, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+    dataset_test = lorenz.LORENZ(partition='test', max_len=3000, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
     loader_test = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
     dataset_val = lorenz.LORENZ(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)

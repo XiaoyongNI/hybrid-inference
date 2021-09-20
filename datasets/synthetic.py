@@ -7,6 +7,7 @@ import torch
 import math
 import matplotlib.pyplot as plt
 from random import randint
+from datasets.Extended_data import F, H, m, n, m1_0, m2_0
 
 
 class SYNTHETIC(data.Dataset):
@@ -14,21 +15,25 @@ class SYNTHETIC(data.Dataset):
         self.partition = partition  # training set or test set
         self.max_len = max_len
         self.equations = equations
-        assert (equations == "acceleration" or equations == "velocity" or equations == "air_resistance")
+        # assert (equations == "acceleration" or equations == "velocity" or equations == "air_resistance")
         self.gnn_format = gnn_format
         self.sparse = sparse
         self.equations = equations
         if equations == "acceleration":
             self.x0 = settings.x0_a
             self.P0 = np.eye(len(self.x0))
+            self.P0 = self.P0*1000
         elif equations == "velocity":
             self.x0 = settings.x0_v
             self.P0 = np.eye(len(self.x0))
+            self.P0 = self.P0*1000
         elif equations == "air_resistance":
             self.x0 = settings.x0_a
             self.P0 = np.eye(len(self.x0))
-        self.P0 = self.P0*1000
-
+            self.P0 = self.P0*1000      
+        elif self.equations == "canonical":
+            self.x0 = m1_0
+            self.P0 = m2_0
         seeds = {'test': 0, 'train': 50, 'val': 51}
 
 
@@ -101,6 +106,8 @@ class SYNTHETIC(data.Dataset):
             sample = simulate_system(create_model_parameters_v, K=tt, x0=self.x0, start_after=start_after)
         elif self.equations == "air_resistance":
             sample = simulate_system(create_model_parameters_ar, K=tt, x0=self.x0, start_after=start_after)
+        elif self.equations == "canonical":
+            sample = simulate_system(create_model_parameters_canonical, K=tt, x0=self.x0, start_after=start_after)
         return list(sample)
 
     def __build_operators(self, nn=20):
@@ -167,6 +174,16 @@ class SYNTHETIC(data.Dataset):
             total += meas.shape[0]
         return total
 
+def create_model_parameters_canonical(q=1, r=1):
+    # Motion model parameters
+    A = F
+    Q = q * q * np.eye(m)
+
+    # Measurement model parameters
+
+    R = r * r * np.eye(n)
+
+    return A, H, Q, R
 
 def create_model_parameters_v(T=1., s2_x = 0.15 **2, s2_y = 0.15 **2, lambda2=0.5 **2):
 

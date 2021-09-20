@@ -16,12 +16,12 @@ lr_base = args.lr
 
 d_utils.init_folders(args.exp_name)
 d_utils.copy_file('exp2_lorenz.py', 'logs/%s/%s' % (args.exp_name, 'exp2_lorenz.py'))
-args.test_samples = 4000
+args.test_samples = 30
 print(args)
 
 
-sweep_samples = np.array([2, 5, 10, 20,  50, 100, 200, 500, 1000, 2000, 5000, 10000]) * 10
-epochs_arr = [1, 5, 30, 50, 60, 70, 70, 60, 60, 30, 25, 20]
+sweep_samples = np.array([200]) * 10
+epochs_arr = [50]
 
 sweep_K = [args.taylor_K]
 
@@ -95,7 +95,7 @@ def hybrid(sigma, epochs, K=1, data=1000):
     args.learned = True
     args.epochs = epochs
     args.taylor_K=K
-    val, test = main.main_lorenz_hybrid(args, sigma, K=K)
+    val, test = main.main_lorenz_hybrid(args, sigma, K=K, dt = 0.02)
     return test
 
 
