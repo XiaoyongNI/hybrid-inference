@@ -47,6 +47,7 @@ class LORENZ(data.Dataset):
             self.data = self._generate_sample(seed=0, tt=tr_tt + val_tt + test_tt)
             self.dump(compact_path, self.data)
         else:
+            print("load pre-generated data!")
             self.data = self.load(compact_path)
 
 

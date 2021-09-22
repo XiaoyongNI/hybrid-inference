@@ -20,8 +20,8 @@ args.test_samples = 3000
 print(args)
 
 
-sweep_samples = np.array([2]) * 10
-epochs_arr = [1]
+sweep_samples = np.array([60000]) * 10
+epochs_arr = [15]
 
 sweep_K = [args.taylor_K]
 
@@ -123,11 +123,11 @@ if __name__ == '__main__':
         if K > 0:
             args.lr = lr_base/2
             for n_samples, epochs in zip(sweep_samples, epochs_arr):
-                print("\n######## \nOnly prior: start\n########\n")
-                best_sigma, test_error = only_prior(K, n_samples)
-                results['prior'].append(test_error)
-                print("\n######## \nOnly prior: end\n########\n")
-
+                # print("\n######## \nOnly prior: start\n########\n")
+                # best_sigma, test_error = only_prior(K, n_samples)
+                # results['prior'].append(test_error)
+                # print("\n######## \nOnly prior: end\n########\n")
+                best_sigma = 7
                 print("\n######## \nHybrid: start\n########\n")
                 test_error = hybrid(best_sigma, epochs, K=K, data=n_samples)
                 results['hybrid'].append(test_error)
