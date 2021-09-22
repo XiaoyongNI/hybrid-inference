@@ -44,7 +44,7 @@ class LORENZ(data.Dataset):
                 self.data = [samples, meas]
                 self.dump(compact_path, self.data)'''
         elif not os.path.exists(compact_path):
-            self.data = self._generate_sample(seed=0, tt=204000)
+            self.data = self._generate_sample(seed=0, tt=tr_tt + val_tt + test_tt)
             self.dump(compact_path, self.data)
         else:
             self.data = self.load(compact_path)

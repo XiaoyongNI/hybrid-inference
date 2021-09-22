@@ -8,6 +8,7 @@ from datasets import synthetic
 from datasets import lorenz
 import numpy as np
 from utils import generic_utils as g_utils
+import time
 
 def test_kalman(args, model, test_loader, plots=False, nclt_ds=False):
     test_loss = 0
@@ -91,6 +92,7 @@ def test_gnn_kalman(args, net, device, loader, plots=False, plot_lorenz=False):
     net.eval()
     test_loss = 0
     test_mse = 0
+    start = time.time()
     with torch.no_grad():
         for batch_idx, (ts, position, meas, x0, P0, operators) in enumerate(loader):
             position, meas, x0 = position.to(device), meas.to(device), x0.to(device)
@@ -101,9 +103,16 @@ def test_gnn_kalman(args, net, device, loader, plots=False, plot_lorenz=False):
 
         test_mse /= loader.dataset.total_len() + 1e-10
         test_loss /= loader.dataset.total_len() + 1e-10
+    
+    end = time.time()
+    t = end - start
+
     if plot_lorenz:
         lorenz.plot_trajectory(args, outputs[-1][0].cpu().numpy(), test_mse)
 
     print('\t{} set: Loss: {:.4f}, MSE: {:.4f}, Len {}'.format(loader.dataset.partition,
         test_loss, test_mse, len(loader.dataset)))
+    
+    # Print Run Time
+    print("Inference Time:", t)
     return test_mse
