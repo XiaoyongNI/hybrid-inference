@@ -154,7 +154,10 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
     val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
 
     net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
-
+    
+    NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+    print("Number of parameters for Hybrid model: ",NumofParameter)
+    
     optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
     min_val = test.test_gnn_kalman(args, net, device, val_loader)
