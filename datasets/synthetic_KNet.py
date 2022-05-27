@@ -97,10 +97,10 @@ class SYNTHETIC(data.Dataset):
         Returns:
             tuple: (state, meas) where target is index of the target class.
         """
-        state, meas, x0, operator = self.data[index]
-        pos = generic_utils.state2position(state).astype(np.float32)
+        state, meas, x0, operator = self.data[index]        
         #x0, P0 = self.__pos2x0(pos[0, :])
         if self.gnn_format:
+            pos = generic_utils.state2position(state).astype(np.float32)
             return np.arange(0, meas.shape[0], 1), pos, meas.astype(np.float32), x0, self.P0, operator
         else:
             return state, meas,  x0, self.P0

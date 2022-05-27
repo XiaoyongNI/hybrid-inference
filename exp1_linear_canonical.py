@@ -5,8 +5,8 @@ import utils.directory_utils as d_utils
 import time
 from datasets.Extended_data import q, r
 
-print("1/r2 [dB]: ", 10 * np.log10(1/r))
-print("1/q2 [dB]: ", 10 * np.log10(1/q))
+print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
+print("1/q2 [dB]: ", 10 * np.log10(1/q**2))
 
 quick = False
 args = settings.get_settings()

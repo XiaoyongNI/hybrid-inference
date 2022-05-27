@@ -61,7 +61,7 @@ def state2position(state):
     elif len(state[0]) == 6:
         position = state[:, [0, 3]]
     else:
-        raise Exception('Error!')
+        position = state
     return position
 
 

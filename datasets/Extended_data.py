@@ -14,7 +14,7 @@ else:
 #########################################
 ### Dataset path and noise statistics ###
 #########################################
-compact_path_linear = "../temp/2x2_rq020_T100_Ttest1000.pt" # path to load pre-generated dataset
+compact_path_linear = "temp/2x2_rq020_T100_Ttest1000.pt" # path to load pre-generated dataset
 r2 = 1 
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
