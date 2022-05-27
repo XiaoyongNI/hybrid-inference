@@ -5,11 +5,22 @@ import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 if torch.cuda.is_available():
-   cuda0 = torch.device("cuda:0")  # you can continue going on here, like cuda:1 cuda:2....etc.
+   dev = torch.device("cuda:0")  # you can continue going on here, like cuda:1 cuda:2....etc.
    torch.set_default_tensor_type('torch.cuda.FloatTensor')
 else:
-   cuda0 = torch.device("cpu")
+   dev = torch.device("cpu")
    print("Running on the CPU")
+
+#########################################
+### Dataset path and noise statistics ###
+#########################################
+compact_path_linear = "../temp/2x2_rq020_T100_Ttest1000.pt" # path to load pre-generated dataset
+r2 = 1 
+r = np.sqrt(r2) # lamb
+vdB = -20 # ratio v=q2/r2
+v = 10**(vdB/10)
+q2 = np.multiply(v,r2)
+q = np.sqrt(q2) # sigma
 
 #######################
 ### Size of DataSet ###
@@ -19,9 +30,9 @@ else:
 N_E = 1000
 
 # Number of Cross Validation Examples
-N_CV = 5
+N_CV = 100
 
-N_T = 30
+N_T = 200
 
 # Sequence Length
 # T = 20
@@ -131,12 +142,12 @@ def DataLoader(fileName):
 
 def DataLoader_GPU(fileName):
     [training_input, training_target, cv_input, cv_target, test_input, test_target] = torch.utils.data.DataLoader(torch.load(fileName),pin_memory = False)
-    training_input = training_input.squeeze().to(cuda0)
-    training_target = training_target.squeeze().to(cuda0)
-    cv_input = cv_input.squeeze().to(cuda0)
-    cv_target =cv_target.squeeze().to(cuda0)
-    test_input = test_input.squeeze().to(cuda0)
-    test_target = test_target.squeeze().to(cuda0)
+    training_input = training_input.squeeze().to(dev)
+    training_target = training_target.squeeze().to(dev)
+    cv_input = cv_input.squeeze().to(dev)
+    cv_target =cv_target.squeeze().to(dev)
+    test_input = test_input.squeeze().to(dev)
+    test_target = test_target.squeeze().to(dev)
     return [training_input, training_target, cv_input, cv_target, test_input, test_target]
 
 def DecimateData(all_tensors, t_gen,t_mod, offset=0):

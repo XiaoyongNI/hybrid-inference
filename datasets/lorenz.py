@@ -258,7 +258,7 @@ class MeasurementModel():
         return measurement
 
 if __name__ == '__main__':
-    dataset = LORENZ(partition='test', sample_dt=0.01, no_pickle=False, max_len=5000, test_tt=5000, val_tt=0, tr_tt=0)
+    dataset = LORENZ(partition='test', sample_dt=0.01, no_pickle=False, max_len=3000, test_tt=3000, val_tt=0, tr_tt=0)
     __plot_trajectory(dataset.data[0][0])
 
 
