@@ -10,6 +10,7 @@ import test
 import losses
 from datasets.dataloader import DataLoader
 from utils import generic_utils as g_utils
+from datasets.Extended_data import m1_0, m2_0
 
 
 def train_hybrid(args, net, device, train_loader, optimizer, epoch):
@@ -97,37 +98,27 @@ def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True):
 
 
 def main_synhtetic_kalman(args, sigma=0.1, lamb=0.5, val_on_train=False, optimal=False, load = True):
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
 
-    device = torch.device("cuda" if use_cuda else "cpu")
-    
-    if optimal:
-        x0_format = 'a'
-    else:
-        x0_format = 'v'
     if val_on_train:
         dataset_train = synthetic_KNet.SYNTHETIC(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples,
                                             test_tt=args.test_samples,
-                                            equations="canonical", gnn_format=True, x0_format=x0_format, load = load)
+                                            equations="canonical", gnn_format=True, load = load)
         train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=False)
 
     dataset_val = synthetic_KNet.SYNTHETIC(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                      equations="canonical", gnn_format=True, x0_format=x0_format, load = load)
+                                      equations="canonical", gnn_format=True, load = load)
     val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
 
     dataset_test = synthetic_KNet.SYNTHETIC(partition='test', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                       equations="canonical", gnn_format=True, x0_format=x0_format, load = load)
+                                       equations="canonical", gnn_format=True, load = load)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
 
     print("Testing for sigma: %.3f \t lambda %.3f" % (sigma, lamb))
-    if optimal:
-        (A, H, Q, R) = synthetic_KNet.create_model_parameters_a()
-        ks_v = kalman.KalmanSmoother(A, H, Q, R, settings.x0_a, 0 * np.eye(len(settings.x0_a)))
-    else:
-        (A, H, Q, R) = synthetic_KNet.create_model_parameters_v(T=1, s2_x=sigma ** 2, s2_y=sigma ** 2, lambda2=lamb ** 2)
-        ks_v = kalman.KalmanSmoother(A, H, Q, R, settings.x0_v, 0 * np.eye(len(settings.x0_v)))
-    print('Testing Kalman Smoother A')
+    (A, H, Q, R) = synthetic_KNet.create_model_parameters_canonical(q=sigma, r=lamb)
+    ks_v = kalman.KalmanSmoother(A, H, Q, R, m1_0, m2_0)
+    
+    print('Testing Kalman Smoother Canonical')
     val_loss = test.test_kalman_nclt(ks_v, val_loader, plots=False)
     test_loss = test.test_kalman_nclt(ks_v, test_loader, plots=False)
 

@@ -33,31 +33,31 @@ if len(sweep_samples) != len(epochs_arr):
 
 
 
-def baseline():
-    print("\n######## \nBaseline: start\n########\n")
-    args.prior = False
-    args.learned = False
-    args.epochs = 1
-    _, test = main_KNet.synthetic_hybrid(args)
-    print("\n######## \nBaseline: end\n########\n")
-    return test
+# def baseline():
+#     print("\n######## \nBaseline: start\n########\n")
+#     args.prior = False
+#     args.learned = False
+#     args.epochs = 1
+#     _, test = main_KNet.synthetic_hybrid(args)
+#     print("\n######## \nBaseline: end\n########\n")
+#     return test
 
-def kalman(data):
-    best_val = 1e8
-    best_sigma = 0.15, 0.15
-    test_error = 1e8
-    args.tr_samples = int(data/2)
-    args.val_samples = data - args.tr_samples
-    # Best: sigma --> 0.063, lamb --> 0.4833
-    for sigma in np.linspace(q-0.5, 0.5, q+8):
-        print("Kalman Smoother sigma %.4f" % sigma)
-        val, test = main_KNet.main_synhtetic_kalman(args, sigma, val_on_train=True, optimal=False)
-        if val < best_val:
-            best_val = val
-            best_sigma = sigma
-            test_error = test
-    print("Kalman Smoother error: %.4f" % test_error)
-    return best_sigma, test_error
+# def kalman(data):
+#     best_val = 1e8
+#     best_sigma = 0.15, 0.15
+#     test_error = 1e8
+#     args.tr_samples = int(data/2)
+#     args.val_samples = data - args.tr_samples
+#     # Best: sigma --> 0.063, lamb --> 0.4833
+#     for sigma in np.linspace(q-0.5, 0.5, q+8):
+#         print("Kalman Smoother sigma %.4f" % sigma)
+#         val, test = main_KNet.main_synhtetic_kalman(args, sigma, val_on_train=True, optimal=False)
+#         if val < best_val:
+#             best_val = val
+#             best_sigma = sigma
+#             test_error = test
+#     print("Kalman Smoother error: %.4f" % test_error)
+#     return best_sigma, test_error
 
 def kalman_optimal():
     _, test = main_KNet.main_synhtetic_kalman(args, sigma=q, lamb=r, val_on_train=False, optimal=True)
@@ -101,11 +101,11 @@ if __name__ == '__main__':
         print("\n######## \nKalman Optimal: end\n########\n")
 
         ## Kalman Smoother ##
-        print("\n######## \nKalman Smoother: start\n########\n")
-        sigma, test_error = kalman(n_samples)
-        results['kalman'].append(test_error)
-        results['sigma_kalman'].append(sigma)
-        print("\n######## \nKalman Smoother: end\n########\n")
+        # print("\n######## \nKalman Smoother: start\n########\n")
+        # sigma, test_error = kalman(n_samples)
+        # results['kalman'].append(test_error)
+        # results['sigma_kalman'].append(sigma)
+        # print("\n######## \nKalman Smoother: end\n########\n")
 
        
 
