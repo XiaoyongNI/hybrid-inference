@@ -35,8 +35,8 @@ N_CV = 100
 N_T = 200
 
 # Sequence Length
-# T = 20
-# T_test = 20
+T = 100
+T_test = 1000
 
 #################
 ## Design #10 ###

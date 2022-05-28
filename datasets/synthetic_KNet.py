@@ -7,11 +7,11 @@ import torch
 import math
 import matplotlib.pyplot as plt
 from random import randint
-from datasets.Extended_data import F, H, m, n, m1_0, m2_0, compact_path_linear
+from datasets.Extended_data import F, H, T, m, n, m1_0, m2_0, compact_path_linear
 
 
 class SYNTHETIC(data.Dataset):
-    def __init__(self, partition='train', max_len=1000, tr_tt=1000, val_tt=1000, test_tt=1000, equations="acceleration", gnn_format=False, sparse=True, x0_format='v',load=True):
+    def __init__(self, partition='train', max_len=T, tr_tt=1000, val_tt=1000, test_tt=1000, equations="acceleration", gnn_format=False, sparse=True, x0_format='v',load=True):
         self.partition = partition  # training set or test set
         self.max_len = max_len
         self.equations = equations
@@ -48,7 +48,7 @@ class SYNTHETIC(data.Dataset):
                 train_target = train_target.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(train_target.shape[0]):                   
+                for i in range(np.minimum(train_target.shape[0],int(tr_tt/max_len))):                   
                     datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0)), m1_0])
                 self.data = datalist
             
@@ -58,7 +58,7 @@ class SYNTHETIC(data.Dataset):
                 cv_target = cv_target.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(cv_target.shape[0]):                   
+                for i in range(np.minimum(cv_target.shape[0],int(val_tt/max_len))):                   
                     datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0)), m1_0])
                 self.data = datalist
             

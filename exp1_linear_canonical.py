@@ -65,7 +65,7 @@ def kalman_optimal():
 
 
 
-def hybrid(sigma, data=1000, epochs=1):
+def hybrid(sigma, data=100, epochs=1):
     args.K = 100
     args.tr_samples = int(data*0.5)
     args.val_samples = int(data - args.tr_samples)
@@ -92,13 +92,13 @@ if __name__ == '__main__':
     #results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
     for n_samples, epochs, lr in zip(sweep_samples, epochs_arr, lr_arr):
         args.lr = lr
-        print("### Linear experiment n_samples: %d \t epochs: %d" % (n_samples, epochs))
+        print("### Linear experiment n_samples: %d \t epochs: %d \t Learning Rate: %d" % (n_samples, epochs, lr))
 
         ## Kalman Smoother Optimal ##
-        print("\n######## \nKalman Optimal: start\n########\n")
-        test_error = kalman_optimal()
-        results['kalman_optimal'].append(test_error)
-        print("\n######## \nKalman Optimal: end\n########\n")
+        # print("\n######## \nKalman Optimal: start\n########\n")
+        # test_error = kalman_optimal()
+        # results['kalman_optimal'].append(test_error)
+        # print("\n######## \nKalman Optimal: end\n########\n")
 
         ## Kalman Smoother ##
         # print("\n######## \nKalman Smoother: start\n########\n")
