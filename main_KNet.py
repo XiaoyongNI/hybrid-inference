@@ -50,15 +50,15 @@ def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True):
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     
     dataset_test = synthetic_KNet.SYNTHETIC(partition='test', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                         equations="canonical", gnn_format=True, load = load, dev=device)
+                                         equations="canonical", gnn_format=True, load = load)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
     dataset_train = synthetic_KNet.SYNTHETIC(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                        equations="canonical", gnn_format=True, load = load, dev=device)
+                                        equations="canonical", gnn_format=True, load = load)
     train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
 
     dataset_val = synthetic_KNet.SYNTHETIC(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                      equations="canonical", gnn_format=True, load = load, dev=device)
+                                      equations="canonical", gnn_format=True, load = load)
     val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
 
     # (A, H, Q, R) = synthetic.create_model_parameters_v(s2_x=sigma ** 2, s2_y=sigma ** 2, lambda2=lamb ** 2)
@@ -108,15 +108,15 @@ def main_synhtetic_kalman(args, sigma=0.1, lamb=0.5, val_on_train=False, optimal
     if val_on_train:
         dataset_train = synthetic_KNet.SYNTHETIC(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples,
                                             test_tt=args.test_samples,
-                                            equations="acceleration", gnn_format=True, x0_format=x0_format, load = load, dev=device)
+                                            equations="canonical", gnn_format=True, x0_format=x0_format, load = load)
         train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=False)
 
     dataset_val = synthetic_KNet.SYNTHETIC(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                      equations="acceleration", gnn_format=True, x0_format=x0_format, load = load, dev=device)
+                                      equations="canonical", gnn_format=True, x0_format=x0_format, load = load)
     val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
 
     dataset_test = synthetic_KNet.SYNTHETIC(partition='test', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
-                                       equations="acceleration", gnn_format=True, x0_format=x0_format, load = load, dev=device)
+                                       equations="canonical", gnn_format=True, x0_format=x0_format, load = load)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
 

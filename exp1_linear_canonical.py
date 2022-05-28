@@ -60,7 +60,7 @@ def kalman(data):
     return best_sigma, test_error
 
 def kalman_optimal():
-    _, test = main_KNet.main_synhtetic_kalman(args, sigma=q, val_on_train=False, optimal=True)
+    _, test = main_KNet.main_synhtetic_kalman(args, sigma=q, lamb=r, val_on_train=False, optimal=True)
     return test
 
 
@@ -86,8 +86,8 @@ def hybrid(sigma, data=1000, epochs=1):
 
 if __name__ == '__main__':
     ## Baseline ##
-    base = baseline()
-    results = {'baseline': base, 'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
+    # base = baseline() ## 'baseline': base,
+    results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
 
     #results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
     for n_samples, epochs, lr in zip(sweep_samples, epochs_arr, lr_arr):

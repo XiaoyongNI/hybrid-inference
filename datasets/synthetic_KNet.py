@@ -11,7 +11,7 @@ from datasets.Extended_data import F, H, m, n, m1_0, m2_0, compact_path_linear
 
 
 class SYNTHETIC(data.Dataset):
-    def __init__(self, partition='train', max_len=1000, tr_tt=1000, val_tt=1000, test_tt=1000, equations="acceleration", gnn_format=False, sparse=True, x0_format='v',load=True, dev=torch.device("cpu")):
+    def __init__(self, partition='train', max_len=1000, tr_tt=1000, val_tt=1000, test_tt=1000, equations="acceleration", gnn_format=False, sparse=True, x0_format='v',load=True):
         self.partition = partition  # training set or test set
         self.max_len = max_len
         self.equations = equations
@@ -39,7 +39,7 @@ class SYNTHETIC(data.Dataset):
 
         if load:
             print("load pre-generated data!")
-            [train_input, train_target, cv_input, cv_target, test_input, test_target] = torch.load(compact_path_linear,map_location=dev)
+            [train_input, train_target, cv_input, cv_target, test_input, test_target] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
         
             ### self.data = list[state, meas]
             if self.partition == 'train':
@@ -64,8 +64,8 @@ class SYNTHETIC(data.Dataset):
             
             elif self.partition == 'test':
                 ### Convert to np array and float64 type
-                test_input = test_input.numpy().astype(np.float64)
-                test_target = test_target.numpy().astype(np.float64)
+                test_input = test_input.cpu().numpy().astype(np.float64)
+                test_target = test_target.cpu().numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
                 for i in range(test_target.shape[0]):                   
