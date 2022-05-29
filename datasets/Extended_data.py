@@ -24,6 +24,9 @@ v = 10**(vdB/10)
 q2 = np.multiply(v,r2)
 q = np.sqrt(q2) # sigma
 
+opt_1overq2_dB = 8.2391
+opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
+
 #######################
 ### Size of DataSet ###
 #######################

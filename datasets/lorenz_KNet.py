@@ -83,7 +83,7 @@ class LORENZ(data.Dataset):
                 ### Convert to list 
                 datalist = []
                 for i in range(test_target.shape[0]):                   
-                    datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0))])
+                    datalist.append([np.transpose(test_target[i,:,:],(1,0)), np.transpose(test_input[i,:,:],(1,0))])
                 self.data = datalist
                 
         else:           
@@ -125,7 +125,7 @@ class LORENZ(data.Dataset):
                 ### Convert to list 
                 datalist = []
                 for i in range(test_target.shape[0]):                   
-                    datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0))])
+                    datalist.append([np.transpose(test_target[i,:,:],(1,0)), np.transpose(test_input[i,:,:],(1,0))])
                 self.data = datalist
 
         self._generate_operators()
@@ -200,7 +200,8 @@ class LORENZ(data.Dataset):
         return self.sigma * (y - x), x * (self.rho - z) - y, x * y - self.beta * z  # derivatives
     
     def h(self, x):
-        y = torch.matmul(self.H, x)
+        H_tensor = torch.from_numpy(np.asarray(self.H, dtype=np.float32))
+        y = torch.matmul(H_tensor, x)
         return y
 
     def _simulate_system(self, tt, x0):

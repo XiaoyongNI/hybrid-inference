@@ -3,7 +3,10 @@ import numpy as np
 import settings
 import time
 import utils.directory_utils as d_utils
-from datasets.Extended_data import q, r
+from datasets.Extended_data import opt_q, r
+
+print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
+print("1/q2 [dB]: ", 10 * np.log10(1/opt_q**2))
 
 args = settings.get_settings()
 args.exp_name = str(time.time())+'_lorenz_K%d' % args.taylor_K
@@ -41,7 +44,7 @@ def only_prior(K=1, data=1000):
     args.prior = True
     args.epochs = 0
     opt_val_loss = 1e8
-    for sigma in np.linspace(np.maximum(0,q-1), 0.1, q+1):       
+    for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):       
         print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
         val_loss, test_loss = main.main_lorenz_hybrid(args, sigma, lamb=r, K=K,decimation=decimation)
         if val_loss < opt_val_loss:
@@ -61,7 +64,7 @@ def kalman(K=5, data=1000):
     args.prior = True
     args.epochs = 0
     opt_val_loss = 1e8
-    for sigma in np.linspace(np.maximum(0,q-1), 0.1, q+1):         
+    for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):         
         print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
         val_loss, test_loss = main.main_lorenz_kalman(args, sigma=sigma, lamb=r, K=K,decimation=decimation)
         if val_loss < opt_val_loss:
