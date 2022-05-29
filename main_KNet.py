@@ -5,12 +5,12 @@ import torch.optim as optim
 import numpy as np
 from models import kalman, gnn
 import settings
-from datasets import synthetic_KNet, nclt, lorenz
+from datasets import lorenz_KNet, synthetic_KNet, nclt
 import test
 import losses
 from datasets.dataloader import DataLoader
 from utils import generic_utils as g_utils
-from datasets.Extended_data import m1_0, m2_0
+from datasets.Extended_data import m1_0, m2_0, lor_T, lor_T_test
 
 
 def train_hybrid(args, net, device, train_loader, optimizer, epoch):
@@ -129,7 +129,7 @@ def main_synhtetic_kalman(args, sigma=0.1, lamb=0.5, val_on_train=False, optimal
     return val_loss, test_loss
 
 
-def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1, plot_lorenz=False):
+def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1, plot_lorenz=False,decimation=True):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
@@ -139,13 +139,13 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
     print("working on device %s" % device)
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-    dataset_test = lorenz.LORENZ(partition='test', max_len=3000, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+    dataset_test = lorenz_KNet.LORENZ(partition='test', max_len=lor_T_test, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
-    dataset_train = lorenz.LORENZ(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+    dataset_train = lorenz_KNet.LORENZ(partition='train', max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
     train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
 
-    dataset_val = lorenz.LORENZ(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+    dataset_val = lorenz_KNet.LORENZ(partition='val',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
     val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
 
     net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
@@ -176,15 +176,15 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
     return min_val.item(), best_test.item()
 
 
-def main_lorenz_kalman(args, sigma=2, lamb=0.5, K=1, dt=0.02, val_on_train=False, plots=False):
+def main_lorenz_kalman(args, sigma=2, lamb=0.5, K=1, dt=0.02, val_on_train=False, plots=False, decimation=True):
     if val_on_train:
-        dataset_train = lorenz.LORENZ(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples,
-                                      test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+        dataset_train = lorenz_KNet.LORENZ(partition='train',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples,
+                                      test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
         loader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
-    dataset_test = lorenz.LORENZ(partition='test', max_len=3000, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+    dataset_test = lorenz_KNet.LORENZ(partition='test', max_len=lor_T_test, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
     loader_test = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
-    dataset_val = lorenz.LORENZ(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt)
+    dataset_val = lorenz_KNet.LORENZ(partition='val',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
     loader_val = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=True)
 
     print("Testing for sigma: %.3f \t lambda %.3f" % (sigma, lamb))

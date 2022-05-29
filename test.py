@@ -88,6 +88,9 @@ def test_kalman_lorenz(args, model, test_loader, plots=False):
         lorenz.plot_trajectory(args, est_state, test_loss)
     print('{} set: Average loss: {:.4f}, Num samples: {}\n'.format(test_loader.dataset.partition,
         test_loss, len(test_loader.dataset)))
+
+    test_loss_dB = 10 * np.log10(test_loss)
+    print("MSE LOSS:", test_loss_dB, "[dB]")
     return test_loss
 
 
@@ -116,7 +119,10 @@ def test_gnn_kalman(args, net, device, loader, plots=False, plot_lorenz=False):
     print('\t{} set: Loss: {:.4f}, MSE: {:.4f}, Len {}'.format(loader.dataset.partition,
         test_loss, test_mse, len(loader.dataset)))
     
-    test_mse_dB = 10 * np.log10(test_mse.cpu().numpy())
+    try:
+      test_mse_dB = 10 * np.log10(test_mse.cpu().numpy())
+    except:
+      test_mse_dB = 10 * np.log10(test_mse)
     print("MSE LOSS:", test_mse_dB, "[dB]")
 
     # Print Run Time

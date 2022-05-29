@@ -15,6 +15,8 @@ else:
 ### Dataset path and noise statistics ###
 #########################################
 compact_path_linear = "temp/2x2_rq020_T100_Ttest1000.pt" # path to load pre-generated dataset
+compact_path_lor_decimation = "temp/data_gen.pt"
+compact_path_lor_DT = "temp/data_lor_v20_rq020_T200.pt"
 r2 = 1 
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
@@ -32,11 +34,15 @@ N_E = 1000
 # Number of Cross Validation Examples
 N_CV = 100
 
+# Number of Test Examples
 N_T = 200
 
 # Sequence Length
 T = 100
 T_test = 1000
+
+lor_T = 3000
+lor_T_test = 3000
 
 #################
 ## Design #10 ###
