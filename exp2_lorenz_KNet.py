@@ -26,7 +26,7 @@ print(args)
 sweep_samples = np.array([2, 5, 10, 20,  50, 100, 200, 500, 1000, 2000, 5000, 10000]) * 10
 epochs_arr = [1, 5, 30, 50, 60, 70, 70, 60, 60, 30, 25, 20]
 
-sweep_K = [2, 5]
+sweep_K = [2]
 decimation = True # true for decimation case, false for DT case
 
 def baseline():
@@ -88,7 +88,7 @@ def hybrid(sigma, epochs, K=1, data=1000):
     args.learned = True
     args.epochs = epochs
     args.taylor_K=K
-    val, test = main.main_lorenz_hybrid(args, sigma, lamb=r, K=K, dt = 0.02, plot_lorenz=True,decimation=decimation)
+    val, test = main.main_lorenz_hybrid(args, sigma, lamb=r, K=K, plot_lorenz=True,decimation=decimation)
     return test
 
 
@@ -112,19 +112,22 @@ if __name__ == '__main__':
 
     for K in sweep_K:
         key = 'K%d' % K
-        results = {'prior': [], 'hybrid': [], 'sigma': [], 'n_samples': []}
+        results = {'prior': [], 'hybrid': [], 'best 1/q2 [dB]': [], 'n_samples': []}
         
-        results_kalman = {'kalman_smoother': [], 'sigma_kalman': [], 'n_samples': []}
-        if K > 0:
-            for n_samples, epochs in zip(sweep_samples, epochs_arr):
-                best_sigma, test_error = kalman(K, n_samples)
-                results_kalman['kalman_smoother'].append(test_error)
-                results_kalman['sigma_kalman'].append(best_sigma)
-                results_kalman['n_samples'].append(n_samples)
+        results_kalman = {'kalman_smoother': [], 'best 1/q2 [dB]': [], 'n_samples': []}
+        if K > 0:         
+            n_samples = sweep_samples[0]
+            epochs = epochs_arr[0]
+            best_sigma, test_error = kalman(K, n_samples)
+            test_error_dB = 10 * np.log10(test_error)
+            best_sigma_dB = 10 * np.log10(1/best_sigma**2)
+            results_kalman['kalman_smoother'].append(test_error_dB)
+            results_kalman['best 1/q2 [dB]'].append(best_sigma_dB)
+            results_kalman['n_samples'].append(n_samples)
 
-                print('\nResults %s' % key)
-                print(results_kalman)
-                print('')
+            print('\nResults %s' % key)
+            print(results_kalman)
+            print('')
         print(results_kalman)
         
         if K > 0:
@@ -132,36 +135,39 @@ if __name__ == '__main__':
             for n_samples, epochs in zip(sweep_samples, epochs_arr):
                 print("\n######## \nOnly prior: start\n########\n")
                 best_sigma, test_error = only_prior(K, n_samples)
-                results['prior'].append(test_error)
+                test_error_dB = 10 * np.log10(test_error)
+                results['prior'].append(test_error_dB)
                 print("\n######## \nOnly prior: end\n########\n")
 
                 print("\n######## \nHybrid: start\n########\n")
                 test_error = hybrid(best_sigma, epochs, K=K, data=n_samples)
-                results['hybrid'].append(test_error)
-                results['sigma'].append(best_sigma)
+                test_error_dB = 10 * np.log10(test_error)
+                best_sigma_dB = 10 * np.log10(1/best_sigma**2)
+                results['hybrid'].append(test_error_dB)
+                results['best 1/q2 [dB]'].append(best_sigma_dB)
                 results['n_samples'].append(n_samples)
                 print("\n######## \nHybrid: end\n########\n")
 
                 print('\nResults %s' % key)
                 print(results)
                 print('')
-        elif K == 0:
-            args.lr = lr_base
-            print("\n######## \nBaseline: start\n########\n")
-            _, baseline_mse = baseline()
-            print("\n######## \nBaseline: end\n########\n")
-            for n_samples, epochs in zip(sweep_samples, epochs_arr):
-                print("\n######## \nGNN: start\n########\n")
-                test_error = only_learned(epochs, n_samples)
-                results['prior'].append(baseline_mse)
-                results['hybrid'].append(test_error)
-                results['sigma'].append(-1)
-                results['n_samples'].append(n_samples)
-                print("\n######## \nGNN: end\n########\n")
+        # elif K == 0:
+        #     args.lr = lr_base
+        #     print("\n######## \nBaseline: start\n########\n")
+        #     _, baseline_mse = baseline()
+        #     print("\n######## \nBaseline: end\n########\n")
+        #     for n_samples, epochs in zip(sweep_samples, epochs_arr):
+        #         print("\n######## \nGNN: start\n########\n")
+        #         test_error = only_learned(epochs, n_samples)
+        #         results['prior'].append(baseline_mse)
+        #         results['hybrid'].append(test_error)
+        #         # results['sigma'].append(-1)
+        #         results['n_samples'].append(n_samples)
+        #         print("\n######## \nGNN: end\n########\n")
 
-                print('\nResults %s' % key)
-                print(results)
-                print('')
+        #         print('\nResults %s' % key)
+        #         print(results)
+        #         print('')
         d_utils.write_file('logs/%s/%s.txt' % (args.exp_name, key), str(results))
 
 

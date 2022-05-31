@@ -10,9 +10,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import math
 from datasets.Extended_data import compact_path_lor_decimation, compact_path_lor_DT, lor_T, Decimate_and_perturbate_Data
 
-#######################
-### Size of DataSet ###
-#######################
+###############
+### DataSet ###
+###############
 
 # Number of Training Examples
 N_E = 100
@@ -22,6 +22,7 @@ N_CV = 5
 
 # Number of Test Examples
 N_T = 10
+
 
 class LORENZ(data.Dataset):
     def __init__(self, partition='train', max_len=lor_T, tr_tt=1000, val_tt=1000, test_tt=3000, gnn_format=False, sparse=True, sample_dt=0.02, decimation=True):
@@ -33,7 +34,7 @@ class LORENZ(data.Dataset):
         self.x0 = [1.0, 1.0, 1.0]
         self.H = np.diag([1]*3)
         self.R = np.diag([1]*3) * self.lamb ** 2
-        self.sample_dt = sample_dt
+        self.sample_dt = 0.02
         self.dt = 0.00001
 
         self.rho = 28.0

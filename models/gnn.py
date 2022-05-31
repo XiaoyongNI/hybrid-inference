@@ -371,7 +371,7 @@ class Hybrid_lorenz(GNN_Kalman):
         self.sigma_lorenz = 10.0
         self.beta = 8.0 / 3.0
         x_0 = np.array([1., 1., 1.]).astype(np.float32)
-        P_0 = np.diag([1] * 3) * 5
+        P_0 = np.diag([1] * 3) * 0
         A, Q, _ = self.gen_tran_matrices(x_0)
         H, R, _ = self.gen_meas_matrices()
 

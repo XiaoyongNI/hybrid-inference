@@ -48,7 +48,7 @@ class KalmanSmoother():
 
 
 class ExtendedKalman_lorenz():
-    def __init__(self, K, dim_x=3, dim_z=3, lamb=2, sigma=2, dt=0.05):
+    def __init__(self, K, dim_x=3, dim_z=3, lamb=2, sigma=2, dt=0.02):
         #Init Kalman filter
         self.rk = ExtendedKalmanFilter(dim_x=dim_x, dim_z=dim_z)
         self.rk.x = np.array([1, 1, 1])
