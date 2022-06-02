@@ -56,32 +56,29 @@ class ExtendedKalman_lorenz():
         self.lamb = lamb
         self.K = K
 
-        self.rho = 28.0
-        self.sigma_lorenz = 10.0
-        self.beta = 8.0 / 3.0
+        self.B = np.array([[[0,  0, 0],[0, 0, -1],[0,  1, 0]],np.zeros((3,3)), np.zeros((3,3))], dtype=np.float32)
+        
+        self.C = np.array([[-10, 10,    0],
+                  [ 28, -1,    0],
+                  [  0,  0, -8/3]], dtype=np.float32)
 
         self.dt = dt
         self.rk.F = self.get_F(self.rk.x)
-        self.rk.R = np.diag([lamb**2]*3)
-        self.rk.Q = self.get_Q(dt=self.dt)
+        self.rk.R = np.diag([self.lamb**2]*3)
+        self.rk.Q = np.diag([self.sigma**2]*3) #self.get_Q(dt=self.dt)
         self.rk.H = np.identity(3, dtype=np.float32)
 
         self.rk.P *= 3
 
 
     def get_F(self, x):
-        A_ = np.array([[-self.sigma_lorenz, self.sigma_lorenz, 0],
-                               [self.rho - x[2], -1, 0],
-                               [x[1], 0, -self.beta]], dtype=np.float32)
+        A_ = np.add(np.reshape(np.matmul(self.B, x),(3,3)).T,self.C)
 
         A = np.diag([1]*3).astype(np.float32)
+            
         for i in range(1, self.K+1):
-            if i == 1:
-                A_p = A_
-            else:
-                A_p = np.matmul(A_, A_p)
-            new_coef = A_p * np.power(self.dt, i) / float(math.factorial(i))
-            A += new_coef
+            A_add = (np.linalg.matrix_power(A_*self.dt, i)) / float(math.factorial(i))
+            A = np.add(A, A_add)
 
         return A
 

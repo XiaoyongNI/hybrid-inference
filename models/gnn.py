@@ -367,7 +367,7 @@ class Hybrid_lorenz(GNN_Kalman):
         self.lamb = lamb
         self.dt = dt
         self.K = K
-        self.B = np.array([[[0,  0, 0],[0, 0, -1],[0,  1, 0]],np.zeros(3,3), np.zeros(3,3)], dtype=np.float32)
+        self.B = np.array([[[0,  0, 0],[0, 0, -1],[0,  1, 0]],np.zeros((3,3)), np.zeros((3,3))], dtype=np.float32)
         
         self.C = np.array([[-10, 10,    0],
                   [ 28, -1,    0],
@@ -385,8 +385,8 @@ class Hybrid_lorenz(GNN_Kalman):
         A_ = np.add(np.reshape(np.matmul(self.B, x),(3,3)).T,self.C)
     
         sigma2 = self.sigma ** 2
-        Q = sigma2 * np.diag([1]*3) * self.dt
-        Q_inv = np.diag([1]*3) / (sigma2 * self.dt)
+        Q = sigma2 * np.diag([1]*3) # * self.dt
+        Q_inv = np.diag([1]*3) / (sigma2) # * self.dt)
 
         A = np.diag([1]*3).astype(np.float32)
             
