@@ -362,14 +362,17 @@ class GNN_Kalman(nn.Module):
 
 class Hybrid_lorenz(GNN_Kalman):
 
-    def __init__(self, args, sigma, lamb, nf, dt, K=1, prior=True, learned=True, init='meas_invariant', gamma=0.005):
+    def __init__(self, args, sigma, lamb, nf, dt, K=5, prior=True, learned=True, init='meas_invariant', gamma=0.005):
         self.sigma = sigma
         self.lamb = lamb
         self.dt = dt
         self.K = K
-        self.rho = 28.0
-        self.sigma_lorenz = 10.0
-        self.beta = 8.0 / 3.0
+        self.B = np.array([[[0,  0, 0],[0, 0, -1],[0,  1, 0]],np.zeros(3,3), np.zeros(3,3)], dtype=np.float32)
+        
+        self.C = np.array([[-10, 10,    0],
+                  [ 28, -1,    0],
+                  [  0,  0, -8/3]], dtype=np.float32)
+        
         x_0 = np.array([1., 1., 1.]).astype(np.float32)
         P_0 = np.diag([1] * 3) * 0
         A, Q, _ = self.gen_tran_matrices(x_0)
@@ -379,22 +382,17 @@ class Hybrid_lorenz(GNN_Kalman):
         GNN_Kalman.__init__(self, args, A, H, Q, R, x_0, P_0, nf, prior=prior, learned=learned, init=init, gamma=gamma)
 
     def gen_tran_matrices(self, x):
-        A_ = np.array([[-self.sigma_lorenz, self.sigma_lorenz, 0],
-                               [self.rho - x[2], -1, 0],
-                               [x[1], 0, -self.beta]], dtype=np.float32)
-
+        A_ = np.add(np.reshape(np.matmul(self.B, x),(3,3)).T,self.C)
+    
         sigma2 = self.sigma ** 2
         Q = sigma2 * np.diag([1]*3) * self.dt
         Q_inv = np.diag([1]*3) / (sigma2 * self.dt)
 
         A = np.diag([1]*3).astype(np.float32)
+            
         for i in range(1, self.K+1):
-            if i == 1:
-                A_p = A_
-            else:
-                A_p = np.matmul(A_, A_p)
-            new_coef = A_p * np.power(self.dt, i) / float(math.factorial(i))
-            A += new_coef
+            A_add = (np.linalg.matrix_power(A_*self.dt, i)) / float(math.factorial(i))
+            A = np.add(A, A_add)
 
         return A, Q, Q_inv
 

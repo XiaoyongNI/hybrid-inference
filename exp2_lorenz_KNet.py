@@ -37,7 +37,7 @@ def baseline():
     return main.main_lorenz_hybrid(args,decimation=decimation)
 
 
-def only_prior(K=1, data=1000):
+def only_prior(K=5, data=1000):
     args.K = 100
     args.tr_samples = 1
     args.val_samples = data
@@ -48,7 +48,7 @@ def only_prior(K=1, data=1000):
     if decimation:
         for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):       
             print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
-            _, test_loss = main.main_lorenz_hybrid(args, sigma, lamb=r, K=K,decimation=decimation)
+            _, test_loss = main.main_lorenz_hybrid(args, sigma, lamb=r,dt=delta_t, K=K,decimation=decimation)
             if test_loss < opt_test:
                 opt_test = test_loss
                 opt_sigma = sigma

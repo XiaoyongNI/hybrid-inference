@@ -172,8 +172,10 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
                 min_val = val_mse
                 ### save best model on validation set
                 torch.save(net, args.path_results + 'best-model.pt')
-    
-    net = torch.load(args.path_results+'best-model.pt', map_location=device)
+    try:
+        net = torch.load(args.path_results+'best-model.pt', map_location=device)
+    except:
+        print("error loading the trained model")
     test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
 
     print("Test loss: %.4f" % (test_mse))
