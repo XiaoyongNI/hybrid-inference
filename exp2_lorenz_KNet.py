@@ -3,10 +3,10 @@ import numpy as np
 import settings
 import time
 import utils.directory_utils as d_utils
-from datasets.Extended_data import opt_q, r
+from datasets.Extended_data import opt_q, r, q
 
 print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
-print("1/q2 [dB]: ", 10 * np.log10(1/opt_q**2))
+print("1/q2 [dB]: ", 10 * np.log10(1/q**2))
 
 args = settings.get_settings()
 args.exp_name = str(time.time())+'_lorenz_K%d' % args.taylor_K
@@ -23,11 +23,12 @@ args.test_samples = 3000
 print(args)
 
 
-sweep_samples = np.array([2, 5, 10, 20,  50, 100, 200, 500, 1000, 2000, 5000, 10000]) * 10
-epochs_arr = [1, 5, 30, 50, 60, 70, 70, 60, 60, 30, 25, 20]
+sweep_samples = np.array([2, 5, 10, 20, 50, 10000]) * 10
+epochs_arr = [1, 5, 30, 50, 60, 20]
 
-sweep_K = [2]
-decimation = True # true for decimation case, false for DT case
+sweep_K = [5]
+decimation = False # true for decimation case, false for DT case
+delta_t = 0.02
 
 def baseline():
     args.prior = False
@@ -43,18 +44,27 @@ def only_prior(K=1, data=1000):
     args.learned = False
     args.prior = True
     args.epochs = 0
-    opt_val_loss = 1e8
-    for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):       
-        print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
-        val_loss, test_loss = main.main_lorenz_hybrid(args, sigma, lamb=r, K=K,decimation=decimation)
-        if val_loss < opt_val_loss:
-            opt_test = test_loss
-            opt_val_loss = val_loss
-            opt_sigma = sigma
-            opt_lamb = r
+    opt_test = 1e8
+    if decimation:
+        for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):       
+            print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
+            _, test_loss = main.main_lorenz_hybrid(args, sigma, lamb=r, K=K,decimation=decimation)
+            if test_loss < opt_test:
+                opt_test = test_loss
+                opt_sigma = sigma
+                opt_lamb = r
 
-    print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
-    return opt_sigma, opt_test
+        print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
+        return opt_sigma, opt_test
+
+    else:
+        print("Sigma: %.4f, \t lamb: %.4f" % (q, r))
+        _, test_loss = main.main_lorenz_hybrid(args, sigma=q, lamb=r,dt=delta_t,K=K,decimation=decimation)
+        opt_test = test_loss
+        opt_sigma = q
+        opt_lamb = r
+        print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
+        return opt_sigma, opt_test
 
 
 def kalman(K=5, data=1000):
@@ -63,18 +73,28 @@ def kalman(K=5, data=1000):
     args.learned = False
     args.prior = True
     args.epochs = 0
-    opt_val_loss = 1e8
-    for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):         
-        print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
-        val_loss, test_loss = main.main_lorenz_kalman(args, sigma=sigma, lamb=r, K=K,decimation=decimation)
-        if val_loss < opt_val_loss:
-            opt_test = test_loss
-            opt_val_loss = val_loss
-            opt_sigma = sigma
-            opt_lamb = r
+    opt_test = 1e8
+    if decimation:
+        for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):         
+            print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
+            _, test_loss = main.main_lorenz_kalman(args, sigma=sigma, lamb=r, K=K,decimation=decimation)
+            if test_loss < opt_test:
+                opt_test = test_loss
+                opt_sigma = sigma
+                opt_lamb = r
 
-    print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
-    return opt_sigma, opt_test
+        print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
+        return opt_sigma, opt_test
+
+    else:
+        print("Sigma: %.4f, \t lamb: %.4f" % (q, r))
+        _, test_loss = main.main_lorenz_kalman(args, sigma=q, lamb=r,dt=delta_t,K=K,decimation=decimation)
+        opt_test = test_loss
+        opt_sigma = q
+        opt_lamb = r
+        print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
+        return opt_sigma, opt_test
+
 
 
 
@@ -88,7 +108,7 @@ def hybrid(sigma, epochs, K=1, data=1000):
     args.learned = True
     args.epochs = epochs
     args.taylor_K=K
-    val, test = main.main_lorenz_hybrid(args, sigma, lamb=r, K=K, plot_lorenz=True,decimation=decimation)
+    val, test = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation)
     return test
 
 

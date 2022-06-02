@@ -44,8 +44,8 @@ N_T = 200
 T = 100
 T_test = 1000
 
-lor_T = 3000
-lor_T_test = 3000
+lor_T = 200
+lor_T_test = 200
 
 #################
 ## Design #10 ###

@@ -156,24 +156,28 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
     optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
     min_val = test.test_gnn_kalman(args, net, device, val_loader)
-    best_test = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
+    # best_test = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
     for epoch in range(1, args.epochs + 1):
         #adjust_learning_rate(optimizer, args.lr, epoch)
         train_hybrid(args, net, device, train_loader, optimizer, epoch)
 
         if epoch % args.test_every == 0:
             val_mse = test.test_gnn_kalman(args, net, device, val_loader)
-            test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
-
+            
             if val_on_train:
                 train_mse = test.test_gnn_kalman(args, net, device, train_loader)
                 val_mse = (val_mse * dataset_val.total_len() + train_mse * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
 
             if val_mse < min_val:
-                min_val, best_test = val_mse, test_mse
+                min_val = val_mse
+                ### save best model on validation set
+                torch.save(net, args.path_results + 'best-model.pt')
+    
+    net = torch.load(args.path_results+'best-model.pt', map_location=device)
+    test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
 
-    print("Test loss: %.4f" % (best_test))
-    return min_val.item(), best_test.item()
+    print("Test loss: %.4f" % (test_mse))
+    return min_val.item(), test_mse.item()
 
 
 def main_lorenz_kalman(args, sigma=2, lamb=0.5, K=1, dt=0.02, val_on_train=False, plots=False, decimation=True):

@@ -15,13 +15,13 @@ from datasets.Extended_data import compact_path_lor_decimation, compact_path_lor
 ###############
 
 # Number of Training Examples
-N_E = 100
+N_E = 1000
 
 # Number of Cross Validation Examples
-N_CV = 5
+N_CV = 100
 
 # Number of Test Examples
-N_T = 10
+N_T = 200
 
 
 class LORENZ(data.Dataset):
@@ -35,7 +35,7 @@ class LORENZ(data.Dataset):
         self.H = np.diag([1]*3)
         self.R = np.diag([1]*3) * self.lamb ** 2
         self.sample_dt = 0.02
-        self.dt = 0.00001
+        self.dt = 0.02
 
         self.rho = 28.0
         self.sigma = 10.0

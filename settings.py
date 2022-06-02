@@ -39,7 +39,8 @@ def get_settings():
     parser.add_argument('--taylor_K', type=int, default=1)
     parser.add_argument('--gamma', type=float, default=0.005)
     parser.add_argument('--init', type=str, default='meas_invariant', help='messages; meas; meas_invariant')
-
+    
+    parser.add_argument('--path_results', type=str, default='models/')
     args = parser.parse_args()
     return args
 
