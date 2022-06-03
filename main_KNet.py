@@ -129,7 +129,7 @@ def main_synhtetic_kalman(args, sigma=0.1, lamb=0.5, val_on_train=False, optimal
     return val_loss, test_loss
 
 
-def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1, plot_lorenz=False,decimation=True,test=False):
+def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1, plot_lorenz=False,decimation=True,test_time=False):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
@@ -173,7 +173,7 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
                 ### save best model on validation set
                 torch.save(net, args.path_results + 'best-model.pt')
     
-    if test:
+    if test_time:
         try:
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
         except:

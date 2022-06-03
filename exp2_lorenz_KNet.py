@@ -99,7 +99,7 @@ def kalman(K=5, data=1000):
 
 
 
-def hybrid(sigma, epochs, K=1, data=1000,test=False):
+def hybrid(sigma, epochs, K=1, data=1000,test_time=False):
     args.K = 100
     args.tr_samples = int(data/2)
     args.val_samples = int(data/2)
@@ -108,10 +108,10 @@ def hybrid(sigma, epochs, K=1, data=1000,test=False):
     args.learned = True
     args.epochs = epochs
     args.taylor_K=K
-    if test:
-        mse = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation,test=test)
+    if test_time:
+        mse = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation,test_time=test_time)
     else:
-        mse = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation,test=False)
+        mse = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation,test_time=False)
     return mse
 
 
@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
                 best_sigma = q
                 print("\n######## \nTrain Hybrid: start\n########\n")
-                val_error = hybrid(best_sigma, epochs, K=K, data=n_samples,test=False)
+                val_error = hybrid(best_sigma, epochs, K=K, data=n_samples,test_time=False)
                 val_error_dB = 10 * np.log10(val_error)
                 best_sigma_dB = 10 * np.log10(1/best_sigma**2)
                 results['hybrid val'].append(val_error_dB)
@@ -177,7 +177,7 @@ if __name__ == '__main__':
                 print('')
 
             print("\n######## \nTest Hybrid: start\n########\n")
-            test_error = hybrid(best_sigma, epochs, K=K, data=n_samples,test=True)
+            test_error = hybrid(best_sigma, epochs, K=K, data=n_samples,test_time=True)
             test_error_dB = 10 * np.log10(test_error)
             results['hybrid test'].append(test_error_dB)
             print('\nResults %s' % key)
