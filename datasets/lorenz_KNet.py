@@ -88,7 +88,7 @@ class LORENZ(data.Dataset):
                 self.data = datalist
                 
         else:           
-            print("load DT Lorenz Attractor data!")
+            print("load DT Lorenz Attractor data:"+compact_path_lor_DT)
             [train_input,train_target, cv_input, cv_target, test_input, test_target] =  torch.load(compact_path_lor_DT,map_location=torch.device("cpu"))
             ### self.data = list[state, meas]
             if self.partition == 'train':

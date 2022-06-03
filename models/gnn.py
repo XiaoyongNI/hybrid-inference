@@ -483,18 +483,19 @@ class Hybrid_lorenz(GNN_Kalman):
             self.update_trans_model(x)
             if self.prior:
                 Mp_arr = self.p_messages(x, meas, x0)
+                print(Mp_arr[0]+Mp_arr[2])
             else:
                 Mp_arr = []
             grad, h = self.gnn(h, operators, Mp_arr)
 
             if self.learned and self.prior:
-                x = x + self.gamma * (grad + sum(Mp_arr))
+                x = x + self.gamma * (grad + 1e-4*sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             elif self.learned and not self.prior:
                 pred = grad + meas
                 pos_track.append(pred.transpose(1, 2))
             elif not self.learned and self.prior:
-                x = x + self.gamma * (grad*0 + sum(Mp_arr))
+                x = x + self.gamma * (grad*0 + 1e-4*sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             else:  # not self.learned and not self.prior
                 pred = grad*0 + meas

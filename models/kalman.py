@@ -97,7 +97,7 @@ class ExtendedKalman_lorenz():
     def HJacobian_at(self, x):
         """ compute Jacobian of H matrix at x """
 
-        H_J = getJacobian(x, self.H)
+        H_J = getJacobian(x, self.rk.H)
 
         return H_J
 

@@ -134,21 +134,21 @@ if __name__ == '__main__':
         key = 'K%d' % K
         results = {'prior': [], 'hybrid': [], 'best 1/q2 [dB]': [], 'n_samples': []}
         
-        results_kalman = {'kalman_smoother': [], 'best 1/q2 [dB]': [], 'n_samples': []}
-        if K > 0:         
-            n_samples = sweep_samples[0]
-            epochs = epochs_arr[0]
-            best_sigma, test_error = kalman(K, n_samples)
-            test_error_dB = 10 * np.log10(test_error)
-            best_sigma_dB = 10 * np.log10(1/best_sigma**2)
-            results_kalman['kalman_smoother'].append(test_error_dB)
-            results_kalman['best 1/q2 [dB]'].append(best_sigma_dB)
-            results_kalman['n_samples'].append(n_samples)
+        # results_kalman = {'kalman_smoother': [], 'best 1/q2 [dB]': [], 'n_samples': []}
+        # if K > 0:         
+        #     n_samples = sweep_samples[0]
+        #     epochs = epochs_arr[0]
+        #     best_sigma, test_error = kalman(K, n_samples)
+        #     test_error_dB = 10 * np.log10(test_error)
+        #     best_sigma_dB = 10 * np.log10(1/best_sigma**2)
+        #     results_kalman['kalman_smoother'].append(test_error_dB)
+        #     results_kalman['best 1/q2 [dB]'].append(best_sigma_dB)
+        #     results_kalman['n_samples'].append(n_samples)
 
-            print('\nResults %s' % key)
-            print(results_kalman)
-            print('')
-        print(results_kalman)
+        #     print('\nResults %s' % key)
+        #     print(results_kalman)
+        #     print('')
+        # print(results_kalman)
         
         if K > 0:
             args.lr = lr_base/2
