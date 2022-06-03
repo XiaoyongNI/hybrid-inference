@@ -99,7 +99,7 @@ def kalman(K=5, data=1000):
 
 
 
-def hybrid(sigma, epochs, K=1, data=1000):
+def hybrid(sigma, epochs, K=1, data=1000,test=False):
     args.K = 100
     args.tr_samples = int(data/2)
     args.val_samples = int(data/2)
@@ -108,8 +108,11 @@ def hybrid(sigma, epochs, K=1, data=1000):
     args.learned = True
     args.epochs = epochs
     args.taylor_K=K
-    val, test = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation)
-    return test
+    if test:
+        mse = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation,test=test)
+    else:
+        mse = main.main_lorenz_hybrid(args, sigma, lamb=r, dt=delta_t, K=K, plot_lorenz=True,decimation=decimation,test=False)
+    return mse
 
 
 def only_learned(epochs, data=1000):
@@ -132,7 +135,7 @@ if __name__ == '__main__':
 
     for K in sweep_K:
         key = 'K%d' % K
-        results = {'prior': [], 'hybrid': [], 'best 1/q2 [dB]': [], 'n_samples': []}
+        results = {'hybrid test': [], 'hybrid val': [], 'best 1/q2 [dB]': [], 'n_samples': []}
         
         # results_kalman = {'kalman_smoother': [], 'best 1/q2 [dB]': [], 'n_samples': []}
         # if K > 0:         
@@ -153,24 +156,34 @@ if __name__ == '__main__':
         if K > 0:
             args.lr = lr_base/2
             for n_samples, epochs in zip(sweep_samples, epochs_arr):
-                print("\n######## \nOnly prior: start\n########\n")
-                best_sigma, test_error = only_prior(K, n_samples)
-                test_error_dB = 10 * np.log10(test_error)
-                results['prior'].append(test_error_dB)
-                print("\n######## \nOnly prior: end\n########\n")
+                # print("\n######## \nOnly prior: start\n########\n")
+                # best_sigma, test_error = only_prior(K, n_samples)
+                # test_error_dB = 10 * np.log10(test_error)
+                # results['prior'].append(test_error_dB)
+                # print("\n######## \nOnly prior: end\n########\n")
 
-                print("\n######## \nHybrid: start\n########\n")
-                test_error = hybrid(best_sigma, epochs, K=K, data=n_samples)
-                test_error_dB = 10 * np.log10(test_error)
+                best_sigma = q
+                print("\n######## \nTrain Hybrid: start\n########\n")
+                val_error = hybrid(best_sigma, epochs, K=K, data=n_samples,test=False)
+                val_error_dB = 10 * np.log10(val_error)
                 best_sigma_dB = 10 * np.log10(1/best_sigma**2)
-                results['hybrid'].append(test_error_dB)
+                results['hybrid val'].append(val_error_dB)
                 results['best 1/q2 [dB]'].append(best_sigma_dB)
                 results['n_samples'].append(n_samples)
-                print("\n######## \nHybrid: end\n########\n")
+                print("\n######## \nTrain Hybrid: end\n########\n")
 
                 print('\nResults %s' % key)
                 print(results)
                 print('')
+
+            print("\n######## \nTest Hybrid: start\n########\n")
+            test_error = hybrid(best_sigma, epochs, K=K, data=n_samples,test=True)
+            test_error_dB = 10 * np.log10(test_error)
+            results['hybrid test'].append(test_error_dB)
+            print('\nResults %s' % key)
+            print(results)
+            print('')
+
         # elif K == 0:
         #     args.lr = lr_base
         #     print("\n######## \nBaseline: start\n########\n")

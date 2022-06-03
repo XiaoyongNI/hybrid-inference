@@ -129,7 +129,7 @@ def main_synhtetic_kalman(args, sigma=0.1, lamb=0.5, val_on_train=False, optimal
     return val_loss, test_loss
 
 
-def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1, plot_lorenz=False,decimation=True):
+def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1, plot_lorenz=False,decimation=True,test=False):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
@@ -172,14 +172,18 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
                 min_val = val_mse
                 ### save best model on validation set
                 torch.save(net, args.path_results + 'best-model.pt')
-    try:
-        net = torch.load(args.path_results+'best-model.pt', map_location=device)
-    except:
-        print("error loading the trained model")
-    test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
+    
+    if test:
+        try:
+            net = torch.load(args.path_results+'best-model.pt', map_location=device)
+        except:
+            print("error loading the trained model")
+        test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
 
-    print("Test loss: %.4f" % (test_mse))
-    return min_val.item(), test_mse.item()
+        print("Test loss: %.4f" % (test_mse))
+        return test_mse.item()
+    else:
+        return min_val.item()
 
 
 def main_lorenz_kalman(args, sigma=2, lamb=0.5, K=1, dt=0.02, val_on_train=False, plots=False, decimation=True):

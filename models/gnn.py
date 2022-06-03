@@ -483,7 +483,7 @@ class Hybrid_lorenz(GNN_Kalman):
             self.update_trans_model(x)
             if self.prior:
                 Mp_arr = self.p_messages(x, meas, x0)
-                print(Mp_arr[0]+Mp_arr[2])
+                # print(Mp_arr[0]+Mp_arr[2])
             else:
                 Mp_arr = []
             grad, h = self.gnn(h, operators, Mp_arr)
