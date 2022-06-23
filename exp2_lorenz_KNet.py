@@ -23,8 +23,8 @@ args.test_samples = 3000
 print(args)
 
 
-sweep_samples = np.array([2, 5, 10, 20, 50, 10000]) * 10
-epochs_arr = [1, 5, 30, 50, 60, 20]
+sweep_samples = np.array([2, 5, 10, 20,  50, 100, 200, 500, 1000, 2000, 5000, 10000]) * 10
+epochs_arr = [1, 5, 30, 50, 60, 70, 70, 60, 60, 30, 25, 20]
 
 sweep_K = [5]
 decimation = False # true for decimation case, false for DT case

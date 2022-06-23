@@ -147,9 +147,14 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
 
     dataset_val = lorenz_KNet.LORENZ(partition='val',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
     val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
-
-    net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
     
+    try:        
+        net = torch.load(args.path_results+'best-model.pt', map_location=device)
+        print("Load network from previous training")
+    except:
+        net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
+        print("Initialize Network")
+        
     NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
     print("Number of parameters for Hybrid model: ",NumofParameter)
     
