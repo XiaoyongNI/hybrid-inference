@@ -14,7 +14,7 @@ args.exp_name = str(time.time())+'_lorenz_K%d' % args.taylor_K
 args.batch_size = 1
 args.init = 'meas_invariant'
 args.gamma = 0.005
-lr_base = args.lr
+args.lr = 1e-4
 
 
 d_utils.init_folders(args.exp_name)
@@ -154,7 +154,6 @@ if __name__ == '__main__':
         # print(results_kalman)
         
         if K > 0:
-            args.lr = lr_base/2
             for n_samples, epochs in zip(sweep_samples, epochs_arr):
                 # print("\n######## \nOnly prior: start\n########\n")
                 # best_sigma, test_error = only_prior(K, n_samples)

@@ -138,7 +138,17 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
     args.device = device
     print("working on device %s" % device)
 
-    if test_time:
+    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    dataset_test = lorenz_KNet.LORENZ(partition='test', max_len=lor_T_test, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
+    test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
+
+    dataset_train = lorenz_KNet.LORENZ(partition='train', max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
+    train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
+
+    dataset_val = lorenz_KNet.LORENZ(partition='val',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
+    val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
+
+    if test_time:### testing
         print("Start testing")
         try:
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
@@ -148,23 +158,15 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
 
         print("Test loss: %.4f" % (test_mse))
         return test_mse.item()
-    else:
-        kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-        dataset_test = lorenz_KNet.LORENZ(partition='test', max_len=lor_T_test, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
-        test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
-
-        dataset_train = lorenz_KNet.LORENZ(partition='train', max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
-        train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
-
-        dataset_val = lorenz_KNet.LORENZ(partition='val',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
-        val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
-        
+    
+    else:### training      
         try:        
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
             print("Load network from previous training")
         except:
             net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
             print("Initialize Network")
+            torch.save(net, args.path_results + 'best-model.pt')
             
         NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
         print("Number of parameters for Hybrid model: ",NumofParameter)
