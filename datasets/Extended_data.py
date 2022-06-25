@@ -16,10 +16,10 @@ else:
 #########################################
 compact_path_linear = "temp/2x2_rq020_T100_Ttest1000.pt" # path to load pre-generated dataset
 compact_path_lor_decimation = "temp/data_gen.pt"
-compact_path_lor_DT = "temp/data_lor_v20_rq020_T200.pt"
-r2 = 1 
+compact_path_lor_DT = "temp/T20_hNL/data_lor_v0_rq-10-10_T20.pt"
+r2 = 10
 r = np.sqrt(r2) # lamb
-vdB = -20 # ratio v=q2/r2
+vdB = 0 # ratio v=q2/r2
 v = 10**(vdB/10)
 q2 = np.multiply(v,r2)
 q = np.sqrt(q2) # sigma
@@ -44,8 +44,8 @@ N_T = 200
 T = 100
 T_test = 1000
 
-lor_T = 200
-lor_T_test = 200
+lor_T = 20
+lor_T_test = 20
 
 #################
 ## Design #10 ###

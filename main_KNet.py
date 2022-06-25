@@ -138,47 +138,8 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
     args.device = device
     print("working on device %s" % device)
 
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-    dataset_test = lorenz_KNet.LORENZ(partition='test', max_len=lor_T_test, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
-    test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
-
-    dataset_train = lorenz_KNet.LORENZ(partition='train', max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
-    train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
-
-    dataset_val = lorenz_KNet.LORENZ(partition='val',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
-    val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
-    
-    try:        
-        net = torch.load(args.path_results+'best-model.pt', map_location=device)
-        print("Load network from previous training")
-    except:
-        net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
-        print("Initialize Network")
-        
-    NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
-    print("Number of parameters for Hybrid model: ",NumofParameter)
-    
-    optimizer = optim.Adam(net.parameters(), lr=args.lr)
-
-    min_val = test.test_gnn_kalman(args, net, device, val_loader)
-    # best_test = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
-    for epoch in range(1, args.epochs + 1):
-        #adjust_learning_rate(optimizer, args.lr, epoch)
-        train_hybrid(args, net, device, train_loader, optimizer, epoch)
-
-        if epoch % args.test_every == 0:
-            val_mse = test.test_gnn_kalman(args, net, device, val_loader)
-            
-            if val_on_train:
-                train_mse = test.test_gnn_kalman(args, net, device, train_loader)
-                val_mse = (val_mse * dataset_val.total_len() + train_mse * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
-
-            if val_mse < min_val:
-                min_val = val_mse
-                ### save best model on validation set
-                torch.save(net, args.path_results + 'best-model.pt')
-    
     if test_time:
+        print("Start testing")
         try:
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
         except:
@@ -188,6 +149,46 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
         print("Test loss: %.4f" % (test_mse))
         return test_mse.item()
     else:
+        kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+        dataset_test = lorenz_KNet.LORENZ(partition='test', max_len=lor_T_test, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
+        test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
+
+        dataset_train = lorenz_KNet.LORENZ(partition='train', max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
+        train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
+
+        dataset_val = lorenz_KNet.LORENZ(partition='val',max_len=lor_T, tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples, gnn_format=True, sparse=True, sample_dt=dt,decimation=decimation)
+        val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
+        
+        try:        
+            net = torch.load(args.path_results+'best-model.pt', map_location=device)
+            print("Load network from previous training")
+        except:
+            net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
+            print("Initialize Network")
+            
+        NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+        print("Number of parameters for Hybrid model: ",NumofParameter)
+        
+        optimizer = optim.Adam(net.parameters(), lr=args.lr)
+
+        min_val = test.test_gnn_kalman(args, net, device, val_loader)
+        # best_test = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
+        for epoch in range(1, args.epochs + 1):
+            #adjust_learning_rate(optimizer, args.lr, epoch)
+            train_hybrid(args, net, device, train_loader, optimizer, epoch)
+
+            if epoch % args.test_every == 0:
+                val_mse = test.test_gnn_kalman(args, net, device, val_loader)
+                
+                if val_on_train:
+                    train_mse = test.test_gnn_kalman(args, net, device, train_loader)
+                    val_mse = (val_mse * dataset_val.total_len() + train_mse * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
+
+                if val_mse < min_val:
+                    min_val = val_mse
+                    ### save best model on validation set
+                    torch.save(net, args.path_results + 'best-model.pt')
+        
         return min_val.item()
 
 

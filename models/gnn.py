@@ -5,6 +5,7 @@ import numpy as np
 from torch.nn.modules.module import Module
 import math
 
+lr_coeff = 1
 
 class MLP(nn.Module):
     """Three-layer fully-connected RELU net"""
@@ -345,13 +346,13 @@ class GNN_Kalman(nn.Module):
             grad, h = self.gnn(h, operators, Mp_arr)
 
             if self.learned and self.prior:
-                x = x + self.gamma * (grad + sum(Mp_arr))
+                x = x + self.gamma * (grad + lr_coeff*sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             elif self.learned and not self.prior:
                 pred = grad + meas
                 pos_track.append(pred.transpose(1, 2))
             elif not self.learned and self.prior:
-                x = x + self.gamma * (grad*0 + sum(Mp_arr))
+                x = x + self.gamma * (grad*0 + lr_coeff*sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             else:  # not self.learned and not self.prior
                 pred = grad*0 + meas
@@ -489,13 +490,13 @@ class Hybrid_lorenz(GNN_Kalman):
             grad, h = self.gnn(h, operators, Mp_arr)
 
             if self.learned and self.prior:
-                x = x + self.gamma * (grad + 1e-4*sum(Mp_arr))
+                x = x + self.gamma * (grad + lr_coeff*sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             elif self.learned and not self.prior:
                 pred = grad + meas
                 pos_track.append(pred.transpose(1, 2))
             elif not self.learned and self.prior:
-                x = x + self.gamma * (grad*0 + 1e-4*sum(Mp_arr))
+                x = x + self.gamma * (grad*0 + lr_coeff*sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             else:  # not self.learned and not self.prior
                 pred = grad*0 + meas
