@@ -68,12 +68,8 @@ class LORENZ(data.Dataset):
                 cv_target = cv_target.numpy().astype(np.float64)
                 ### Convert to list 
                 datalist = []
-                if val_tt < max_len:
-                    n_cv = random.randint(0, N_CV - 1)
-                    datalist.append([np.transpose(cv_target[n_cv,:,0:val_tt],(1,0)), np.transpose(cv_input[n_cv,:,0:val_tt],(1,0))])
-                else:
-                    for i in range(np.minimum(cv_target.shape[0],int(val_tt/max_len))):                   
-                        datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0))])
+                for i in range(cv_target.shape[0]):                   
+                    datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0))])
                 self.data = datalist
 
             if self.partition == 'test':
@@ -111,12 +107,8 @@ class LORENZ(data.Dataset):
                 cv_target = cv_target.numpy().astype(np.float64)
                 ### Convert to list 
                 datalist = []
-                if val_tt < max_len:
-                    n_cv = random.randint(0, N_CV - 1)
-                    datalist.append([np.transpose(cv_target[n_cv,:,0:val_tt],(1,0)), np.transpose(cv_input[n_cv,:,0:val_tt],(1,0))])
-                else:
-                    for i in range(np.minimum(cv_target.shape[0],int(val_tt/max_len))):                   
-                        datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0))])
+                for i in range(cv_target.shape[0]):                   
+                    datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0))])
                 self.data = datalist
 
             if self.partition == 'test':

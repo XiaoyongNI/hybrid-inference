@@ -153,7 +153,7 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
         try:
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
         except:
-            print("error loading the trained model")
+            print("Error loading the trained model!!!")
         test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
 
         print("Test loss: %.4f" % (test_mse))
@@ -166,10 +166,9 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
         except:
             net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
             print("Initialize Network")
-            torch.save(net, args.path_results + 'best-model.pt')
-            
-        NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
-        print("Number of parameters for Hybrid model: ",NumofParameter)
+            torch.save(net, args.path_results + 'best-model.pt')          
+            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+            print("Number of parameters for Hybrid model: ",NumofParameter)
         
         optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
