@@ -8,20 +8,7 @@ import os
 import pickle
 from mpl_toolkits.mplot3d import Axes3D
 import math
-from datasets.Extended_data import compact_path_lor_decimation, compact_path_lor_DT, lor_T, Decimate_and_perturbate_Data
-
-###############
-### DataSet ###
-###############
-
-# Number of Training Examples
-N_E = 1000
-
-# Number of Cross Validation Examples
-N_CV = 100
-
-# Number of Test Examples
-N_T = 200
+from datasets.Extended_data import compact_path_lor_decimation, compact_path_lor_DT, lor_T, Decimate_and_perturbate_Data, delta_t, sample_delta_t, N_E, N_CV, N_T
 
 
 class LORENZ(data.Dataset):
@@ -34,8 +21,8 @@ class LORENZ(data.Dataset):
         self.x0 = [1.0, 1.0, 1.0]
         self.H = np.diag([1]*3)
         self.R = np.diag([1]*3) * self.lamb ** 2
-        self.sample_dt = 0.02
-        self.dt = 0.02
+        self.sample_dt = sample_delta_t
+        self.dt = delta_t
 
         self.rho = 28.0
         self.sigma = 10.0

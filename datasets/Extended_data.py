@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import math
+from torch import autograd
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -27,9 +28,9 @@ q = np.sqrt(q2) # sigma
 opt_1overq2_dB = 8.2391
 opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
 
-#######################
-### Size of DataSet ###
-#######################
+########################
+### DataSet Settings ###
+########################
 
 # Number of Training Examples
 N_E = 1000
@@ -40,12 +41,54 @@ N_CV = 100
 # Number of Test Examples
 N_T = 200
 
-# Sequence Length
+# Sequence Length for Linear case
 T = 100
 T_test = 1000
-
+# Sequence Length for NL lorenz case
 lor_T = 20
 lor_T_test = 20
+
+m1_x0 = np.array([1., 1., 1.]).astype(np.float32) # initial x0
+m2_x0 = np.diag([1] * 3) * 0 # initial P0
+delta_t = 0.02 # dt that generates the dataset
+sample_delta_t = 0.02 # sampling dt
+
+lr_coeff = 1 # the ratio between GM message and GNN message
+
+####################
+### Non-linear h ###
+####################
+
+HNL = True #True for Non-linear observation h, False for linear H
+
+def h_nonlinear(x):
+    return torch.squeeze(toSpherical(x))
+
+def toSpherical(cart):
+
+    rho = torch.norm(cart, p=2).view(1,1)
+    phi = torch.atan2(cart[1, ...], cart[0, ...]).view(1, 1)
+    phi = phi + (phi < 0).type_as(phi) * (2 * torch.pi)
+
+    theta = torch.acos(cart[2, ...] / rho).view(1, 1)
+
+    spher = torch.cat([rho, theta, phi], dim=0)
+
+    return spher
+
+# Compute the Jacobians of h
+def getJacobian(x, g):
+    
+    # if(x.size()[1] == 1):
+    #     y = torch.reshape((x.T),[x.size()[0]])
+    
+    y = torch.reshape((x.permute(*torch.arange(x.ndim - 1, -1, -1))),[x.size()[0]])
+
+    Jac = autograd.functional.jacobian(g, y)
+    Jac = Jac.view(-1,m)
+    return Jac
+
+
 
 #################
 ## Design #10 ###

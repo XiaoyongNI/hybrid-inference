@@ -4,8 +4,9 @@ import torch
 import numpy as np
 from torch.nn.modules.module import Module
 import math
+from datasets.Extended_data import lr_coeff, HNL, h_nonlinear, getJacobian, m1_x0, m2_x0
 
-lr_coeff = 1
+
 
 class MLP(nn.Module):
     """Three-layer fully-connected RELU net"""
@@ -374,10 +375,10 @@ class Hybrid_lorenz(GNN_Kalman):
                   [ 28, -1,    0],
                   [  0,  0, -8/3]], dtype=np.float32)
         
-        x_0 = np.array([1., 1., 1.]).astype(np.float32)
-        P_0 = np.diag([1] * 3) * 0
+        x_0 = m1_x0
+        P_0 = m2_x0
         A, Q, _ = self.gen_tran_matrices(x_0)
-        H, R, _ = self.gen_meas_matrices()
+        H, R, _ = self.gen_meas_matrices(x_0)
 
 
         GNN_Kalman.__init__(self, args, A, H, Q, R, x_0, P_0, nf, prior=prior, learned=learned, init=init, gamma=gamma)
@@ -397,10 +398,13 @@ class Hybrid_lorenz(GNN_Kalman):
 
         return A, Q, Q_inv
 
-    def gen_meas_matrices(self):
+    def gen_meas_matrices(self, x):
         R = np.diag([self.lamb ** 2] * 3)
         R_inv = np.diag([1/(self.lamb ** 2)] * 3)
-        H = np.diag([1]*3)
+        if(HNL):### if h is NL, use Jacobian matrix of h(x)
+            H = getJacobian(x, h_nonlinear)
+        else:
+            H = np.diag([1]*3)
         return H, R, R_inv
 
     def update_bs(self, tensor, bs):
@@ -417,15 +421,28 @@ class Hybrid_lorenz(GNN_Kalman):
             Qs.append(self.np2torch(Q))
             Q_invs.append(self.np2torch(Q_inv))
         return torch.cat(As, dim=0).to(self.args.device), torch.cat(Qs, dim=0).to(self.args.device), torch.cat(Q_invs, dim=0).to(self.args.device)
+    
+    def update_bs_H_R(self, x):
+        Hs, Rs, R_invs = [], [], []
+        for i in list(range(x.shape[2] - 1)):
+            H, R, R_inv = self.gen_meas_matrices(x.detach().cpu().numpy()[0, :, i])
+            Hs.append(self.np2torch(H))
+            Rs.append(self.np2torch(R))
+            R_invs.append(self.np2torch(R_inv))
+        return torch.cat(Hs, dim=0).to(self.args.device), torch.cat(Rs, dim=0).to(self.args.device), torch.cat(R_invs, dim=0).to(self.args.device)
+
 
     def update_trans_model(self, x):
         self.A_b, self.Q_b, self.Q_inv_b = self.update_bs_A_Q(x)
 
-    def update_meas_model(self, bs):
+    def update_meas_bs(self, bs):      
         self.H_b = self.update_bs(self.H, bs)
         self.R_b = self.update_bs(self.R, bs)
         self.R_inv_b = self.update_bs(self.R_inv, bs)
         self.x_0_b = self.update_bs(self.x_0, bs)
+
+    def update_meas_model(self, x):      
+        self.H_b, self.R_b, self.R_inv_b = self.update_bs_H_R(x)
 
     def m1(self, x):
         A_b = torch.cat([self.A_b[[0]], self.A_b], dim=0)
@@ -464,7 +481,7 @@ class Hybrid_lorenz(GNN_Kalman):
         [operators, meas] = input
         self._set_trainable()
         meas = torch.transpose(meas, 1, 2)
-        self.update_meas_model(meas.size(0))
+        self.update_meas_bs(meas.size(0))
         x = self.init_states(meas)
 
         ## Init h from observations ##
@@ -482,6 +499,8 @@ class Hybrid_lorenz(GNN_Kalman):
         pos_track = []
         for i in range(T):
             self.update_trans_model(x)
+            if(HNL):
+                self.update_meas_model(x)
             if self.prior:
                 Mp_arr = self.p_messages(x, meas, x0)
                 # print(Mp_arr[0]+Mp_arr[2])
