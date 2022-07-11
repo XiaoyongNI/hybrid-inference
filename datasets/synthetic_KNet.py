@@ -31,9 +31,8 @@ class SYNTHETIC(data.Dataset):
             self.x0 = settings.x0_a
             self.P0 = np.eye(len(self.x0))
             self.P0 = self.P0*1000      
-        elif self.equations == "canonical":
-            if not InitIsRandom:
-                self.x0 = m1_0
+        elif self.equations == "canonical":           
+            self.x0 = m1_0
             self.P0 = m2_0
         seeds = {'test': 0, 'train': 50, 'val': 51}
 
