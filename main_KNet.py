@@ -39,7 +39,7 @@ def adjust_learning_rate(optimizer, lr, epoch):
         param_group['lr'] = new_lr
 
 
-def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True):
+def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True,test_time=False):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
@@ -64,37 +64,50 @@ def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True):
 
     # (A, H, Q, R) = synthetic.create_model_parameters_v(s2_x=sigma ** 2, s2_y=sigma ** 2, lambda2=lamb ** 2)
     (A, H, Q, R) = synthetic_KNet.create_model_parameters_canonical(r=lamb,q=sigma)
-
-
-    net = gnn.GNN_Kalman(args, A, H, Q, R, dataset_train.x0,  dataset_train.P0, nf=args.nf,
-                             prior=args.prior,  learned=args.learned, init=args.init, gamma=args.gamma).to(device)
-    #print(net)
-    optimizer = optim.Adam(net.parameters(), lr=args.lr)
-
-    min_val = test.test_gnn_kalman(args, net, device, val_loader)
-    best_test = test.test_gnn_kalman(args, net, device, test_loader, plots=False)
-
-    if val_on_train:
-        train_mse = test.test_gnn_kalman(args, net, device, train_loader)
-        min_val = (min_val * dataset_val.total_len() + train_mse * dataset_train.total_len()) / (dataset_val.total_len() + dataset_train.total_len())
-
-
-    for epoch in range(1, args.epochs + 1):
-        #adjust_learning_rate(optimizer, args.lr, epoch)
-        train_hybrid(args, net, device, train_loader, optimizer, epoch)
-
-        val_mse = test.test_gnn_kalman(args, net, device, val_loader)
+    
+    if test_time:### testing
+        print("Start testing")
+        try:
+            net = torch.load(args.path_results+'best-model.pt', map_location=device)
+        except:
+            print("Error loading the trained model!!!")
         test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False)
 
-        if val_on_train:
-            train_mse = test.test_gnn_kalman(args, net, device, train_loader)
-            val_mse = (val_mse * dataset_val.total_len() + train_mse * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
+        print("Test loss: %.4f" % (test_mse))
+        return test_mse.item()
+    
+    else:### training  
+        try:        
+            net = torch.load(args.path_results+'best-model.pt', map_location=device)
+            print("Load network from previous training")
+        except:
+            net = gnn.GNN_Kalman(args, A, H, Q, R, dataset_train.x0,  dataset_train.P0, nf=args.nf,
+                                prior=args.prior,  learned=args.learned, init=args.init, gamma=args.gamma).to(device)
+            print("Initialize Network")
+            torch.save(net, args.path_results + 'best-model.pt')          
+            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+            print("Number of parameters for Hybrid model: ",NumofParameter)    
+   
+        #print(net)
+        optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
-        if val_mse < min_val:
-            min_val, best_test = val_mse, test_mse
+        min_val = test.test_gnn_kalman(args, net, device, val_loader)
 
-    print("Test loss: %.4f" % (best_test))
-    return min_val.item(), best_test.item()
+        for epoch in range(1, args.epochs + 1):
+            #adjust_learning_rate(optimizer, args.lr, epoch)
+            train_hybrid(args, net, device, train_loader, optimizer, epoch)
+
+            val_mse = test.test_gnn_kalman(args, net, device, val_loader)
+            
+            if val_on_train:
+                train_mse = test.test_gnn_kalman(args, net, device, train_loader)
+                val_mse = (val_mse * dataset_val.total_len() + train_mse * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
+
+            if val_mse < min_val:
+                min_val = val_mse
+                ### save best model on validation set
+                torch.save(net, args.path_results + 'best-model.pt')
+        return min_val.item()
 
 
 def main_synhtetic_kalman(args, sigma=0.1, lamb=0.5, val_on_train=False, optimal=False, load = True):

@@ -58,7 +58,7 @@ class SYNTHETIC(data.Dataset):
                 cv_target = cv_target.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(np.minimum(cv_target.shape[0],int(val_tt/max_len))):                   
+                for i in range(cv_target.shape[0]):                   
                     datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0)), m1_0])
                 self.data = datalist
             

@@ -17,11 +17,10 @@ args.gamma = 0.005
 args.lr = 1e-3
 sweep_K = [5]
 decimation = False # true for decimation case, false for DT case
-delta_t = 0.02
+delta_t = 0.02 # dt passed to the model
 
 d_utils.init_folders(args.exp_name)
 d_utils.copy_file('exp2_lorenz.py', 'logs/%s/%s' % (args.exp_name, 'exp2_lorenz.py'))
-args.test_samples = 3000
 print(args)
 
 sweep_samples = np.array([2, 5, 10, 20,  50, 100, 200, 500, 1000, 2000, 5000, 10000]) * 10

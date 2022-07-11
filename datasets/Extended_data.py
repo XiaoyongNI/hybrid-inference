@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import math
-from torch import autograd
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -20,7 +19,7 @@ compact_path_lor_decimation = "temp/data_gen.pt"
 compact_path_lor_DT = "temp/T20_hNL/data_lor_v0_rq00_T20.pt"
 r2 = 1
 r = np.sqrt(r2) # lamb
-vdB = 0 # ratio v=q2/r2
+vdB = -20 # ratio v=q2/r2
 v = 10**(vdB/10)
 q2 = np.multiply(v,r2)
 q = np.sqrt(q2) # sigma
@@ -53,13 +52,13 @@ m2_x0 = np.diag([1] * 3) * 0 # initial P0
 delta_t = 0.02 # dt that generates the dataset
 sample_delta_t = 0.02 # sampling dt
 
-lr_coeff = 1 # the ratio between GM message and GNN message
+lr_coeff = 0.1 # the ratio between GM message and GNN message
 
 ####################
 ### Non-linear h ###
 ####################
 
-HNL = True #True for Non-linear observation h, False for linear H
+HNL = False #True for Non-linear observation h, False for linear H
 
 def h_nonlinear(x):
     return torch.squeeze(toSpherical(x))
@@ -76,23 +75,13 @@ def toSpherical(cart):
 
     return spher
 
-# Compute the Jacobians of h
-def getJacobian(x, g):
-    
-    # if(x.size()[1] == 1):
-    #     y = torch.reshape((x.T),[x.size()[0]])
-    
-    y = torch.reshape((x.permute(*torch.arange(x.ndim - 1, -1, -1))),[x.size()[0]])
-
-    Jac = autograd.functional.jacobian(g, y)
-    Jac = Jac.view(-1,m)
-    return Jac
 
 
 
-#################
-## Design #10 ###
-#################
+
+##########################
+## Linear case F and H ###
+##########################
 F10 = np.array([[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
                 [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],

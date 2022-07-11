@@ -59,27 +59,24 @@ def baseline():
 #     print("Kalman Smoother error: %.4f" % test_error)
 #     return best_sigma, test_error
 
-# def kalman_optimal():
-#     _, test = main_KNet.main_synhtetic_kalman(args, sigma=q, lamb=r, val_on_train=False, optimal=True)
-#     return test
+def kalman_optimal():
+    _, test = main_KNet.main_synhtetic_kalman(args, sigma=q, lamb=r, val_on_train=False, optimal=True)
+    return test
 
 
 
-def hybrid(sigma, data=100, epochs=1):
+def hybrid(sigma, data=100, epochs=1,test_time=False):
     args.K = 100
     args.tr_samples = int(data*0.5)
     args.val_samples = int(data - args.tr_samples)
     args.prior = True
     args.learned = True
     args.epochs = epochs
-    best_val = 1e8
-    test_error = 1e8
-    val, test = main_KNet.synthetic_hybrid(args, sigma=sigma,lamb=r)
-    if val < best_val:
-        best_val = val
-        test_error = test
-
-    return test_error
+    if test_time:
+        mse = main_KNet.synthetic_hybrid(args, sigma=sigma,lamb=r,test_time=True)
+    else:
+        mse = main_KNet.synthetic_hybrid(args, sigma=sigma,lamb=r,test_time=False)
+    return mse
 
 
 
@@ -87,7 +84,7 @@ def hybrid(sigma, data=100, epochs=1):
 if __name__ == '__main__':
     ## Baseline ##
     # base = baseline() ## 'baseline': base,
-    results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
+    results = {'hybrid test': [], 'hybrid val': [],'kalman_optimal':[]}
 
     #results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
     for n_samples, epochs, lr in zip(sweep_samples, epochs_arr, lr_arr):
@@ -112,9 +109,10 @@ if __name__ == '__main__':
 
         ## Hybrid ##
         print("\n######## \nHybrid: start\n########\n")
-        test_error = hybrid(best_sigma, data=n_samples, epochs=int(epochs))
+        val_error = hybrid(best_sigma, data=n_samples, epochs=int(epochs),test_time=False)
         #test_error = hybrid(0.425, data=n_samples, epochs=int(epochs))
-        results['hybrid'].append(test_error)
+        val_error_dB = 10 * np.log10(val_error)
+        results['hybrid val'].append(val_error_dB)
         print("\n######## \nHybrid: end\n########\n")
 
         # Meta-informations
@@ -122,6 +120,15 @@ if __name__ == '__main__':
         results['n_samples'].append(n_samples)
 
         print('\nResults %s \n' % str(results))
+        print('')
+    
+    print("\n######## \nTest Hybrid: start\n########\n")
+    test_error = hybrid(best_sigma, data=n_samples, epochs=1,test_time=True)
+    test_error_dB = 10 * np.log10(test_error)
+    results['hybrid test'].append(test_error_dB)
+    print('\nResults %s'% str(results))
+    print(results)
+    print('')
 
     d_utils.write_file('logs/%s/log.txt' % (args.exp_name), str(results))
 
