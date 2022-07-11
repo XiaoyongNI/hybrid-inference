@@ -8,7 +8,6 @@ from datasets.Extended_data import q, r
 print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
 print("1/q2 [dB]: ", 10 * np.log10(1/q**2))
 
-quick = False
 args = settings.get_settings()
 args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
@@ -17,7 +16,8 @@ args.batch_size = 1
 args.gamma = 0.03
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
-
+args.lr = 1e-3
+best_sigma = q
 
 print(args)
 lr_base = float(args.lr)
@@ -25,7 +25,6 @@ sweep_samples = np.array([10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 10
 epochs_arr = [40, 40, 60, 50, 50, 50, 40, 50, 50, 40, 25]
 lr_arr = [lr_base/10, lr_base/5, lr_base/2] + [lr_base] * (len(epochs_arr) - 5)
 
-best_sigma = q
 
 if len(sweep_samples) != len(epochs_arr):
     raise Exception('Arrays "sweep_samples" and "epochs_arr" do not match.')
@@ -92,10 +91,10 @@ if __name__ == '__main__':
         print("### Linear experiment n_samples: %d \t epochs: %d \t Learning Rate: %f" % (n_samples, epochs, lr))
 
         ## Kalman Smoother Optimal ##
-        # print("\n######## \nKalman Optimal: start\n########\n")
-        # test_error = kalman_optimal()
-        # results['kalman_optimal'].append(test_error)
-        # print("\n######## \nKalman Optimal: end\n########\n")
+        print("\n######## \nKalman Optimal: start\n########\n")
+        test_error = kalman_optimal()
+        results['kalman_optimal'].append(test_error)
+        print("\n######## \nKalman Optimal: end\n########\n")
 
         ## Kalman Smoother ##
         # print("\n######## \nKalman Smoother: start\n########\n")

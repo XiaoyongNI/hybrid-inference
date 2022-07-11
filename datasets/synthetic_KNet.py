@@ -7,7 +7,7 @@ import torch
 import math
 import matplotlib.pyplot as plt
 from random import randint
-from datasets.Extended_data import F, H, T, m, n, m1_0, m2_0, compact_path_linear
+from datasets.Extended_data import F, H, T, m, n, m1_0, m2_0, compact_path_linear,InitIsRandom
 
 
 class SYNTHETIC(data.Dataset):
@@ -32,44 +32,63 @@ class SYNTHETIC(data.Dataset):
             self.P0 = np.eye(len(self.x0))
             self.P0 = self.P0*1000      
         elif self.equations == "canonical":
-            self.x0 = m1_0
+            if not InitIsRandom:
+                self.x0 = m1_0
             self.P0 = m2_0
         seeds = {'test': 0, 'train': 50, 'val': 51}
 
 
         if load:
             print("load pre-generated data!")
-            [train_input, train_target, cv_input, cv_target, test_input, test_target] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
+            if InitIsRandom:
+                [train_input, train_target, train_init, cv_input, cv_target, cv_init, test_input, test_target, test_init] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
+            else:
+                [train_input, train_target, cv_input, cv_target, test_input, test_target] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
         
             ### self.data = list[state, meas]
             if self.partition == 'train':
                 ### Convert to np array and float64 type
                 train_input = train_input.numpy().astype(np.float64)
                 train_target = train_target.numpy().astype(np.float64)
+                if InitIsRandom:
+                    train_init = train_init.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(np.minimum(train_target.shape[0],int(tr_tt/max_len))):                   
-                    datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0)), m1_0])
+                for i in range(np.minimum(train_target.shape[0],int(tr_tt/max_len))):
+                    if InitIsRandom:
+                        datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0)), train_init[i,:]])
+                    else:                   
+                        datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0)), m1_0])
                 self.data = datalist
             
             elif self.partition == 'val':
                 ### Convert to np array and float64 type
                 cv_input = cv_input.numpy().astype(np.float64)
                 cv_target = cv_target.numpy().astype(np.float64)
+                if InitIsRandom:
+                    cv_init = cv_init.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(cv_target.shape[0]):                   
-                    datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0)), m1_0])
+                for i in range(cv_target.shape[0]): 
+                    if InitIsRandom:
+                        datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0)), cv_init[i,:]])  
+                    else:              
+                        datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0)), m1_0])
                 self.data = datalist
             
             elif self.partition == 'test':
                 ### Convert to np array and float64 type
                 test_input = test_input.cpu().numpy().astype(np.float64)
                 test_target = test_target.cpu().numpy().astype(np.float64)
+                if InitIsRandom:
+                    test_init = test_init.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(test_target.shape[0]):                   
-                    datalist.append([np.transpose(test_target[i,:,:],(1,0)), np.transpose(test_input[i,:,:],(1,0)), m1_0])
+                for i in range(test_target.shape[0]): 
+                    if InitIsRandom:
+                        datalist.append([np.transpose(test_target[i,:,:],(1,0)), np.transpose(test_input[i,:,:],(1,0)), test_init[i,:]]) 
+                    else:                
+                        datalist.append([np.transpose(test_target[i,:,:],(1,0)), np.transpose(test_input[i,:,:],(1,0)), m1_0])
                 self.data = datalist
             
             else:
