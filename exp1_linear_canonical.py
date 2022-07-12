@@ -16,7 +16,7 @@ args.batch_size = 1
 args.gamma = 0.003
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
-args.lr = 1e-5
+args.lr = 1e-3
 best_sigma = q
 
 print(args)
@@ -86,15 +86,15 @@ if __name__ == '__main__':
     results = {'hybrid test': [], 'hybrid val': [],'kalman_optimal':[]}
 
     #results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
+     ## Kalman Smoother Optimal ##
+    print("\n######## \nKalman Optimal: start\n########\n")
+    test_error = kalman_optimal()
+    results['kalman_optimal'].append(test_error)
+    print("\n######## \nKalman Optimal: end\n########\n")
+
     for n_samples, epochs, lr in zip(sweep_samples, epochs_arr, lr_arr):
         args.lr = lr
         print("### Linear experiment n_samples: %d \t epochs: %d \t Learning Rate: %f" % (n_samples, epochs, lr))
-
-        ## Kalman Smoother Optimal ##
-        print("\n######## \nKalman Optimal: start\n########\n")
-        test_error = kalman_optimal()
-        results['kalman_optimal'].append(test_error)
-        print("\n######## \nKalman Optimal: end\n########\n")
 
         ## Kalman Smoother ##
         # print("\n######## \nKalman Smoother: start\n########\n")

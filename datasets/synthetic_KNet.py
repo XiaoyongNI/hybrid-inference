@@ -47,47 +47,47 @@ class SYNTHETIC(data.Dataset):
             ### self.data = list[state, meas]
             if self.partition == 'train':
                 ### Convert to np array and float64 type
-                train_input = train_input.numpy().astype(np.float64)
-                train_target = train_target.numpy().astype(np.float64)
+                train_input = [t.numpy().astype(np.float64) for t in train_input]
+                train_target = [t.numpy().astype(np.float64) for t in train_target]
                 if InitIsRandom:
                     train_init = train_init.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(np.minimum(train_target.shape[0],int(tr_tt/max_len))):
+                for i in range(np.minimum(len(train_target),int(tr_tt/max_len))):
                     if InitIsRandom:
-                        datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0)), train_init[i,:]])
+                        datalist.append([np.transpose(train_target[i],(1,0)), np.transpose(train_input[i],(1,0)), train_init[i,:]])
                     else:                   
-                        datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0)), m1_0])
+                        datalist.append([np.transpose(train_target[i],(1,0)), np.transpose(train_input[i],(1,0)), m1_0])
                 self.data = datalist
             
             elif self.partition == 'val':
                 ### Convert to np array and float64 type
-                cv_input = cv_input.numpy().astype(np.float64)
-                cv_target = cv_target.numpy().astype(np.float64)
+                cv_input = [t.numpy().astype(np.float64) for t in cv_input]
+                cv_target = [t.numpy().astype(np.float64) for t in cv_target]
                 if InitIsRandom:
                     cv_init = cv_init.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(cv_target.shape[0]): 
+                for i in range(len(cv_target)): 
                     if InitIsRandom:
-                        datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0)), cv_init[i,:]])  
+                        datalist.append([np.transpose(cv_target[i],(1,0)), np.transpose(cv_input[i],(1,0)), cv_init[i,:]])  
                     else:              
-                        datalist.append([np.transpose(cv_target[i,:,:],(1,0)), np.transpose(cv_input[i,:,:],(1,0)), m1_0])
+                        datalist.append([np.transpose(cv_target[i],(1,0)), np.transpose(cv_input[i],(1,0)), m1_0])
                 self.data = datalist
             
             elif self.partition == 'test':
                 ### Convert to np array and float64 type
-                test_input = test_input.cpu().numpy().astype(np.float64)
-                test_target = test_target.cpu().numpy().astype(np.float64)
+                test_input = [t.numpy().astype(np.float64) for t in test_input]
+                test_target = [t.numpy().astype(np.float64) for t in test_target]
                 if InitIsRandom:
                     test_init = test_init.numpy().astype(np.float64)
                 ### Convert to list and append x0
                 datalist = []
-                for i in range(test_target.shape[0]): 
+                for i in range(len(test_target)): 
                     if InitIsRandom:
-                        datalist.append([np.transpose(test_target[i,:,:],(1,0)), np.transpose(test_input[i,:,:],(1,0)), test_init[i,:]]) 
+                        datalist.append([np.transpose(test_target[i],(1,0)), np.transpose(test_input[i],(1,0)), test_init[i,:]]) 
                     else:                
-                        datalist.append([np.transpose(test_target[i,:,:],(1,0)), np.transpose(test_input[i,:,:],(1,0)), m1_0])
+                        datalist.append([np.transpose(test_target[i],(1,0)), np.transpose(test_input[i],(1,0)), m1_0])
                 self.data = datalist
             
             else:
