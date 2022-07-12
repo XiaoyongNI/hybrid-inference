@@ -46,6 +46,7 @@ def test_kalman_nclt(model, test_loader, plots=False):
     test_loss = 0
     j = 0
     sample_loss = torch.empty([len(test_loader.dataset)])
+    start = time.time()
     for _, state, meas, x_0, P_0, _ in test_loader:
         batch_size = state.size()[0]
         for i in range(batch_size):
@@ -62,7 +63,8 @@ def test_kalman_nclt(model, test_loader, plots=False):
             test_loss += sample_loss[j]
             sample_loss[j] /= state.size()[1]##average over traj length T  
             j += 1
-              
+    end = time.time()
+    t = end - start         
     test_loss /= test_loader.dataset.total_len()
     print('{} set: Average loss: {:.4f}, Num samples: {}\n'.format(test_loader.dataset.partition,
         test_loss, len(test_loader.dataset)))
@@ -76,6 +78,9 @@ def test_kalman_nclt(model, test_loader, plots=False):
     test_std_dB = 10 * torch.log10(MSE_test_linear_std + test_loss) - test_loss_dB
     print("MSE LOSS std:", test_std_dB, "[dB]")
 
+    # Print Run Time
+    print("Inference Time:", t)
+
     return test_loss
 
 
@@ -83,6 +88,7 @@ def test_kalman_lorenz(args, model, test_loader, plots=False):
     test_loss = 0
     j = 0
     sample_loss = torch.empty([len(test_loader.dataset)])
+    start = time.time()
     for _, state, meas, x_0, P_0, _ in test_loader:
         batch_size = state.size()[0]
         for i in range(batch_size):
@@ -97,7 +103,8 @@ def test_kalman_lorenz(args, model, test_loader, plots=False):
             sample_loss[j] /= state.size()[1]##average over traj length T
             j += 1
     test_loss /= test_loader.dataset.total_len()
-
+    end = time.time()
+    t = end - start   
     if plots:
         lorenz.plot_trajectory(args, est_state, test_loss)
     print('{} set: Average loss: {:.4f}, Num samples: {}\n'.format(test_loader.dataset.partition,
@@ -112,6 +119,9 @@ def test_kalman_lorenz(args, model, test_loader, plots=False):
     # Confidence interval
     test_std_dB = 10 * torch.log10(MSE_test_linear_std + test_loss) - test_loss_dB
     print("MSE LOSS std:", test_std_dB, "[dB]")
+
+    # Print Run Time
+    print("Inference Time:", t)
     return test_loss
 
 

@@ -14,8 +14,8 @@ else:
 #########################################
 ### Dataset path and noise statistics ###
 #########################################
-InitIsRandom = True
-compact_path_linear = "temp/Generalization/2x2_rq020_T100_randinit.pt" # path to load pre-generated dataset
+InitIsRandom = False
+compact_path_linear = "temp/Generalization/2x2_rq020_T100_Ttest1000.pt" # path to load pre-generated dataset
 compact_path_lor_decimation = "temp/data_gen.pt"
 compact_path_lor_DT = "temp/T20_hNL/data_lor_v0_rq00_T20.pt"
 r2 = 1
@@ -53,7 +53,7 @@ m2_x0 = np.diag([1] * 3) * 0 # initial P0
 delta_t = 0.02 # dt that generates the dataset
 sample_delta_t = 0.02 # sampling dt
 
-lr_coeff = 0.1 # the ratio between GM message and GNN message
+lr_coeff = 1 # the ratio between GM message and GNN message
 
 ####################
 ### Non-linear h ###

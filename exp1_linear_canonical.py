@@ -13,7 +13,7 @@ args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
 
 args.batch_size = 1
-args.gamma = 0.03
+args.gamma = 0.003
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
 args.lr = 1e-5
@@ -91,10 +91,10 @@ if __name__ == '__main__':
         print("### Linear experiment n_samples: %d \t epochs: %d \t Learning Rate: %f" % (n_samples, epochs, lr))
 
         ## Kalman Smoother Optimal ##
-        # print("\n######## \nKalman Optimal: start\n########\n")
-        # test_error = kalman_optimal()
-        # results['kalman_optimal'].append(test_error)
-        # print("\n######## \nKalman Optimal: end\n########\n")
+        print("\n######## \nKalman Optimal: start\n########\n")
+        test_error = kalman_optimal()
+        results['kalman_optimal'].append(test_error)
+        print("\n######## \nKalman Optimal: end\n########\n")
 
         ## Kalman Smoother ##
         # print("\n######## \nKalman Smoother: start\n########\n")
@@ -107,16 +107,16 @@ if __name__ == '__main__':
 
 
         ## Hybrid ##
-        # print("\n######## \nHybrid: start\n########\n")
-        # val_error = hybrid(best_sigma, data=n_samples, epochs=int(epochs),test_time=False)
-        # #test_error = hybrid(0.425, data=n_samples, epochs=int(epochs))
-        # val_error_dB = 10 * np.log10(val_error)
-        # results['hybrid val'].append(val_error_dB)
-        # print("\n######## \nHybrid: end\n########\n")
+        print("\n######## \nHybrid: start\n########\n")
+        val_error = hybrid(best_sigma, data=n_samples, epochs=int(epochs),test_time=False)
+        #test_error = hybrid(0.425, data=n_samples, epochs=int(epochs))
+        val_error_dB = 10 * np.log10(val_error)
+        results['hybrid val'].append(val_error_dB)
+        print("\n######## \nHybrid: end\n########\n")
 
-        # # Meta-informations
-        # print('\nResults %s \n' % str(results))
-        # print('')
+        # Meta-informations
+        print('\nResults %s \n' % str(results))
+        print('')
     
     print("\n######## \nTest Hybrid: start\n########\n")
     test_error = hybrid(best_sigma, data=n_samples, epochs=1,test_time=True)

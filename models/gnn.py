@@ -343,18 +343,19 @@ class GNN_Kalman(nn.Module):
         for i in range(T):
             if self.prior:
                 Mp_arr = self.p_messages(x, meas, x0)
+                Mp_arr = [lr_coeff*i for i in Mp_arr]
             else:
                 Mp_arr = []
             grad, h = self.gnn(h, operators, Mp_arr)
 
             if self.learned and self.prior:
-                x = x + self.gamma * (grad + lr_coeff*sum(Mp_arr))
+                x = x + self.gamma * (grad + sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             elif self.learned and not self.prior:
                 pred = grad + meas
                 pos_track.append(pred.transpose(1, 2))
             elif not self.learned and self.prior:
-                x = x + self.gamma * (grad*0 + lr_coeff*sum(Mp_arr))
+                x = x + self.gamma * (grad*0 + sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             else:  # not self.learned and not self.prior
                 pred = grad*0 + meas
