@@ -132,7 +132,7 @@ H[0] = np.ones((1,n))
 for i in range(n):
     H[i,n-1-i] = 1
 
-m1_0 = np.zeros((m, 1), dtype=np.float32)
+m1_0 = np.zeros((m), dtype=np.float32)
 m2_0 = 0 * 0 * np.eye(m)
 
 
