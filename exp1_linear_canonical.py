@@ -13,7 +13,7 @@ args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
 
 args.batch_size = 1
-args.gamma = 0.003
+args.gamma = 0.03
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
 args.lr = 1e-3
@@ -24,7 +24,7 @@ best_sigma = q
    
 print(args)
 lr_base = float(args.lr)
-sweep_samples = np.array([10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 10000]) * 10
+sweep_samples = np.array([10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 10000]) * 50
 epochs_arr = [40, 40, 60, 50, 50, 50, 40, 50, 50, 40, 25]
 lr_arr = [lr_base/10, lr_base/5, lr_base/2] + [lr_base] * (len(epochs_arr) - 5)
 

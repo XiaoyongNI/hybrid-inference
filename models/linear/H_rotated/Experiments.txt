@@ -1,0 +1,6 @@
+rq-1010
+
+Full
+gamma = 0.03, lr = 1e-3
+
+Partial

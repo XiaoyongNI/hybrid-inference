@@ -15,7 +15,7 @@ else:
 ### Dataset path and noise statistics ###
 #########################################
 InitIsRandom = False
-RotateH = True
+RotateH = False
 HNL = False #True for Non-linear observation h, False for linear H
 # compact_path_linear = "temp/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'temp/H_rotated/2x2_Hrot10_rq-1010_T100.pt'
@@ -119,21 +119,21 @@ m1_0 = np.array([0.0, 0.0], dtype=np.float32)
 m2_0 = 0 * 0 * np.eye(m)
 
 # Inaccurate model knowledge based on matrix rotation
-F_rotated = torch.zeros_like(F)
-H_rotated = torch.zeros_like(H)
+F_rotated = np.zeros_like(F)
+H_rotated = np.zeros_like(H)
 if(m==2):
     alpha_degree = 10
-    rotate_alpha = torch.tensor([alpha_degree/180*torch.pi]).to(dev)
-    cos_alpha = torch.cos(rotate_alpha)
-    sin_alpha = torch.sin(rotate_alpha)
-    rotate_matrix = torch.tensor([[cos_alpha, -sin_alpha],
-                                [sin_alpha, cos_alpha]]).to(dev)
+    rotate_alpha = np.array([alpha_degree/180*np.pi])
+    cos_alpha = np.cos(rotate_alpha)
+    sin_alpha = np.sin(rotate_alpha)
+    rotate_matrix = np.array([[cos_alpha, -sin_alpha],
+                                [sin_alpha, cos_alpha]])
     # print(rotate_matrix)
-    F_rotated = torch.mm(F,rotate_matrix) #inaccurate process model
-    H_rotated = torch.mm(H,rotate_matrix) #inaccurate observation model
+    F_rotated = np.matmul(F,rotate_matrix) #inaccurate process model
+    H_rotated = np.matmul(H,rotate_matrix) #inaccurate observation model
 
 if RotateH:
-    H = H_rotated
+    H = np.squeeze(H_rotated)
 
 ################################
 ### 5 x 5, 10 x 10 and so on ###
