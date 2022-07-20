@@ -17,8 +17,11 @@ args.gamma = 0.003
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
 args.lr = 1e-3
+args.K = 100
+args.prior = True
+args.learned = True
 best_sigma = q
-
+   
 print(args)
 lr_base = float(args.lr)
 sweep_samples = np.array([10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 10000]) * 10
@@ -65,11 +68,8 @@ def kalman_optimal():
 
 
 def hybrid(sigma, data=100, epochs=1,test_time=False):
-    args.K = 100
     args.tr_samples = int(data*0.5)
     args.val_samples = int(data - args.tr_samples)
-    args.prior = True
-    args.learned = True
     args.epochs = epochs
     if test_time:
         mse = main_KNet.synthetic_hybrid(args, sigma=sigma,lamb=r,test_time=True)

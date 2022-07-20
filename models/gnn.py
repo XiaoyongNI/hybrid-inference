@@ -364,185 +364,185 @@ class GNN_Kalman(nn.Module):
         return pos_track
 
 
-# class Hybrid_lorenz(GNN_Kalman):
+class Hybrid_lorenz(GNN_Kalman):
 
-#     def __init__(self, args, sigma, lamb, nf, dt, K=5, prior=True, learned=True, init='meas_invariant', gamma=0.005):
-#         self.sigma = sigma
-#         self.lamb = lamb
-#         self.dt = dt
-#         self.K = K
-#         self.B = np.array([[[0,  0, 0],[0, 0, -1],[0,  1, 0]],np.zeros((3,3)), np.zeros((3,3))], dtype=np.float32)
+    def __init__(self, args, sigma, lamb, nf, dt, K=5, prior=True, learned=True, init='meas_invariant', gamma=0.005):
+        self.sigma = sigma
+        self.lamb = lamb
+        self.dt = dt
+        self.K = K
+        self.B = np.array([[[0,  0, 0],[0, 0, -1],[0,  1, 0]],np.zeros((3,3)), np.zeros((3,3))], dtype=np.float32)
         
-#         self.C = np.array([[-10, 10,    0],
-#                   [ 28, -1,    0],
-#                   [  0,  0, -8/3]], dtype=np.float32)
+        self.C = np.array([[-10, 10,    0],
+                  [ 28, -1,    0],
+                  [  0,  0, -8/3]], dtype=np.float32)
         
-#         x_0 = m1_x0
-#         P_0 = m2_x0
-#         A, Q, _ = self.gen_tran_matrices(x_0)
-#         self.dim_state = A.shape[1]
-#         H, R, _ = self.gen_meas_matrices(x_0)      
+        x_0 = m1_x0
+        P_0 = m2_x0
+        A, Q, _ = self.gen_tran_matrices(x_0)
+        self.dim_state = A.shape[1]
+        H, R, _ = self.gen_meas_matrices(x_0)      
 
-#         GNN_Kalman.__init__(self, args, A, H, Q, R, x_0, P_0, nf, prior=prior, learned=learned, init=init, gamma=gamma)
+        GNN_Kalman.__init__(self, args, A, H, Q, R, x_0, P_0, nf, prior=prior, learned=learned, init=init, gamma=gamma)
 
-#     def gen_tran_matrices(self, x):
-#         A_ = np.add(np.reshape(np.matmul(self.B, x),(3,3)).T,self.C)
+    def gen_tran_matrices(self, x):
+        A_ = np.add(np.reshape(np.matmul(self.B, x),(3,3)).T,self.C)
     
-#         sigma2 = self.sigma ** 2
-#         Q = sigma2 * np.diag([1]*3) # * self.dt
-#         Q_inv = np.diag([1]*3) / (sigma2) # * self.dt)
+        sigma2 = self.sigma ** 2
+        Q = sigma2 * np.diag([1]*3) # * self.dt
+        Q_inv = np.diag([1]*3) / (sigma2) # * self.dt)
 
-#         A = np.diag([1]*3).astype(np.float32)
+        A = np.diag([1]*3).astype(np.float32)
             
-#         for i in range(1, self.K+1):
-#             A_add = (np.linalg.matrix_power(A_*self.dt, i)) / float(math.factorial(i))
-#             A = np.add(A, A_add)
+        for i in range(1, self.K+1):
+            A_add = (np.linalg.matrix_power(A_*self.dt, i)) / float(math.factorial(i))
+            A = np.add(A, A_add)
 
-#         return A, Q, Q_inv
+        return A, Q, Q_inv
 
-#     def getJacobian(self, x, g):   
-#         x = torch.from_numpy(x.astype(np.float32))
-#         y = torch.reshape((x.permute(*torch.arange(x.ndim - 1, -1, -1))),[x.size()[0]])
-#         Jac = autograd.functional.jacobian(g, y)
-#         Jac = Jac.view(-1,self.dim_state)
-#         return Jac
+    def getJacobian(self, x, g):   
+        x = torch.from_numpy(x.astype(np.float32))
+        y = torch.reshape((x.permute(*torch.arange(x.ndim - 1, -1, -1))),[x.size()[0]])
+        Jac = autograd.functional.jacobian(g, y)
+        Jac = Jac.view(-1,self.dim_state)
+        return Jac
 
-#     def gen_meas_matrices(self, x):
-#         R = np.diag([self.lamb ** 2] * 3)
-#         R_inv = np.diag([1/(self.lamb ** 2)] * 3)
-#         if(HNL):### if h is NL, use Jacobian matrix of h(x)
-#             H = self.getJacobian(x, h_nonlinear)
-#             H = H.detach().cpu().numpy()
-#         else:
-#             H = np.diag([1]*3)
-#         return H, R, R_inv
+    def gen_meas_matrices(self, x):
+        R = np.diag([self.lamb ** 2] * 3)
+        R_inv = np.diag([1/(self.lamb ** 2)] * 3)
+        if(HNL):### if h is NL, use Jacobian matrix of h(x)
+            H = self.getJacobian(x, h_nonlinear)
+            H = H.detach().cpu().numpy()
+        else:
+            H = np.diag([1]*3)
+        return H, R, R_inv
 
-#     def update_bs(self, tensor, bs):
-#         repetitions = [1] * len(tensor.size())
-#         repetitions[0] = bs
-#         tensor = tensor.repeat(repetitions)
-#         return tensor
+    def update_bs(self, tensor, bs):
+        repetitions = [1] * len(tensor.size())
+        repetitions[0] = bs
+        tensor = tensor.repeat(repetitions)
+        return tensor
 
-#     def update_bs_A_Q(self, x):
-#         As, Qs, Q_invs = [], [], []
-#         for i in list(range(x.shape[2] - 1)):
-#             A, Q, Q_inv = self.gen_tran_matrices(x.detach().cpu().numpy()[0, :, i])
-#             As.append(self.np2torch(A))
-#             Qs.append(self.np2torch(Q))
-#             Q_invs.append(self.np2torch(Q_inv))
-#         return torch.cat(As, dim=0).to(self.args.device), torch.cat(Qs, dim=0).to(self.args.device), torch.cat(Q_invs, dim=0).to(self.args.device)
+    def update_bs_A_Q(self, x):
+        As, Qs, Q_invs = [], [], []
+        for i in list(range(x.shape[2] - 1)):
+            A, Q, Q_inv = self.gen_tran_matrices(x.detach().cpu().numpy()[0, :, i])
+            As.append(self.np2torch(A))
+            Qs.append(self.np2torch(Q))
+            Q_invs.append(self.np2torch(Q_inv))
+        return torch.cat(As, dim=0).to(self.args.device), torch.cat(Qs, dim=0).to(self.args.device), torch.cat(Q_invs, dim=0).to(self.args.device)
     
-#     def update_bs_H_R(self, x):
-#         Hs, Rs, R_invs = [], [], []
-#         for i in list(range(x.shape[2] - 1)):
-#             H, R, R_inv = self.gen_meas_matrices(x.detach().cpu().numpy()[0, :, i])
-#             Hs.append(self.np2torch(H))
-#             Rs.append(self.np2torch(R))
-#             R_invs.append(self.np2torch(R_inv))
-#         return torch.cat(Hs, dim=0).to(self.args.device), torch.cat(Rs, dim=0).to(self.args.device), torch.cat(R_invs, dim=0).to(self.args.device)
+    def update_bs_H_R(self, x):
+        Hs, Rs, R_invs = [], [], []
+        for i in list(range(x.shape[2] - 1)):
+            H, R, R_inv = self.gen_meas_matrices(x.detach().cpu().numpy()[0, :, i])
+            Hs.append(self.np2torch(H))
+            Rs.append(self.np2torch(R))
+            R_invs.append(self.np2torch(R_inv))
+        return torch.cat(Hs, dim=0).to(self.args.device), torch.cat(Rs, dim=0).to(self.args.device), torch.cat(R_invs, dim=0).to(self.args.device)
 
 
-#     def update_trans_model(self, x):
-#         self.A_b, self.Q_b, self.Q_inv_b = self.update_bs_A_Q(x)
+    def update_trans_model(self, x):
+        self.A_b, self.Q_b, self.Q_inv_b = self.update_bs_A_Q(x)
 
-#     def update_meas_bs(self, bs):      
-#         self.H_b = self.update_bs(self.H, bs)
-#         self.R_b = self.update_bs(self.R, bs)
-#         self.R_inv_b = self.update_bs(self.R_inv, bs)
-#         self.x_0_b = self.update_bs(self.x_0, bs)
+    def update_meas_bs(self, bs):      
+        self.H_b = self.update_bs(self.H, bs)
+        self.R_b = self.update_bs(self.R, bs)
+        self.R_inv_b = self.update_bs(self.R_inv, bs)
+        self.x_0_b = self.update_bs(self.x_0, bs)
 
-#     def update_meas_model(self, x):      
-#         self.H_b, self.R_b, self.R_inv_b = self.update_bs_H_R(x)
+    def update_meas_model(self, x):      
+        self.H_b, self.R_b, self.R_inv_b = self.update_bs_H_R(x)
 
-#     def m1(self, x):
-#         A_b = torch.cat([self.A_b[[0]], self.A_b], dim=0)
-#         Q_inv_b = torch.cat([self.Q_inv_b[[0]], self.Q_inv_b], dim=0)
-#         x_t_m1 = torch.cat([x[:, :, [0]], x], dim=2)[:, :, 0:x.size(2)].clone()
+    def m1(self, x):
+        A_b = torch.cat([self.A_b[[0]], self.A_b], dim=0)
+        Q_inv_b = torch.cat([self.Q_inv_b[[0]], self.Q_inv_b], dim=0)
+        x_t_m1 = torch.cat([x[:, :, [0]], x], dim=2)[:, :, 0:x.size(2)].clone()
 
-#         # x_t_m1.shape = (bs, nf, Nodes)
-#         x_t_m1 = x_t_m1.transpose(0, 2) # x_t_m1.shape = (nodes, nf, bs = 1)
-#         x = x.transpose(0, 2)
-#         pred = torch.bmm(A_b, x_t_m1)
-#         m1 = - torch.bmm(Q_inv_b, x - pred).transpose(0, 2)
+        # x_t_m1.shape = (bs, nf, Nodes)
+        x_t_m1 = x_t_m1.transpose(0, 2) # x_t_m1.shape = (nodes, nf, bs = 1)
+        x = x.transpose(0, 2)
+        pred = torch.bmm(A_b, x_t_m1)
+        m1 = - torch.bmm(Q_inv_b, x - pred).transpose(0, 2)
 
-#         x = x.transpose(0, 2)
-#         m1 = m1[:, :, 1:(x.size(-1))].clone()
-#         m1 = F.pad(m1, (1, 0), mode='constant', value=0)
-#         return m1
+        x = x.transpose(0, 2)
+        m1 = m1[:, :, 1:(x.size(-1))].clone()
+        m1 = F.pad(m1, (1, 0), mode='constant', value=0)
+        return m1
     
-#     # def m2(self, x, meas):
-#     #     H_b = torch.cat([self.H_b[[0]], self.H_b], dim=0)
-#     #     R_inv_b = torch.cat([self.R_inv_b[[0]], self.R_inv_b], dim=0)
-#     #     x = x.transpose(0, 2)
+    # def m2(self, x, meas):
+    #     H_b = torch.cat([self.H_b[[0]], self.H_b], dim=0)
+    #     R_inv_b = torch.cat([self.R_inv_b[[0]], self.R_inv_b], dim=0)
+    #     x = x.transpose(0, 2)
         
-#     #     coef1 = torch.bmm(H_b.transpose(1, 2), R_inv_b)
-#     #     coef2 = (meas - torch.bmm(H_b, x))
-#     #     m2 = torch.bmm(coef1, coef2)
-#     #     # (self.H.transpose() @ self.R_inv) @ (meas - self.H @ x)
-#     #     return m2
+    #     coef1 = torch.bmm(H_b.transpose(1, 2), R_inv_b)
+    #     coef2 = (meas - torch.bmm(H_b, x))
+    #     m2 = torch.bmm(coef1, coef2)
+    #     # (self.H.transpose() @ self.R_inv) @ (meas - self.H @ x)
+    #     return m2
 
-#     def m3(self, x):
-#         A_b = torch.cat([self.A_b, self.A_b[-1:]], dim=0)
-#         Q_inv_b = torch.cat([self.Q_inv_b, self.Q_inv_b[-1:]], dim=0)
-#         x_t_p1 = F.pad(x, (0, 1), mode='constant', value=0)
-#         x_t_p1 = x_t_p1[:, :, 1:(x.size(2)+1)].clone()
-#         coef1 = torch.bmm(A_b.transpose(1, 2), Q_inv_b)
-#         x_t_p1 = x_t_p1.transpose(0, 2)
-#         x = x.transpose(0, 2)
-#         coef2 = x_t_p1 - torch.bmm(A_b, x) - self.u_p1()
-#         m3 = torch.bmm(coef1, coef2)
-#         m3 = m3.transpose(0, 2)
-#         x = x.transpose(0, 2)
-#         m3 = m3[:, :, 0:(x.size(-1) - 1)].clone()
-#         m3 = F.pad(m3, (0, 1), mode='constant', value=0)
-#         return m3
+    def m3(self, x):
+        A_b = torch.cat([self.A_b, self.A_b[-1:]], dim=0)
+        Q_inv_b = torch.cat([self.Q_inv_b, self.Q_inv_b[-1:]], dim=0)
+        x_t_p1 = F.pad(x, (0, 1), mode='constant', value=0)
+        x_t_p1 = x_t_p1[:, :, 1:(x.size(2)+1)].clone()
+        coef1 = torch.bmm(A_b.transpose(1, 2), Q_inv_b)
+        x_t_p1 = x_t_p1.transpose(0, 2)
+        x = x.transpose(0, 2)
+        coef2 = x_t_p1 - torch.bmm(A_b, x) - self.u_p1()
+        m3 = torch.bmm(coef1, coef2)
+        m3 = m3.transpose(0, 2)
+        x = x.transpose(0, 2)
+        m3 = m3[:, :, 0:(x.size(-1) - 1)].clone()
+        m3 = F.pad(m3, (0, 1), mode='constant', value=0)
+        return m3
 
-#     def forward(self, input, x0, T=20, ts=None):
-#         self.ts = ts
-#         [operators, meas] = input
-#         self._set_trainable()
-#         meas = torch.transpose(meas, 1, 2)
-#         self.update_meas_bs(meas.size(0))
-#         x = self.init_states(meas)
+    def forward(self, input, x0, T=20, ts=None):
+        self.ts = ts
+        [operators, meas] = input
+        self._set_trainable()
+        meas = torch.transpose(meas, 1, 2)
+        self.update_meas_bs(meas.size(0))
+        x = self.init_states(meas)
 
-#         ## Init h from observations ##
-#         if self.init == 'messages':
-#             Mnp = self.p_messages(x, meas, x0)
-#             h = self.layer0(sum(Mnp))
-#         elif self.init == 'meas':
-#             h = self.layer0(meas)
-#         elif self.init == 'meas_invariant':
-#             h = self.gnn.init_h(meas)
-#         else:
-#             raise Exception('Error')
+        ## Init h from observations ##
+        if self.init == 'messages':
+            Mnp = self.p_messages(x, meas, x0)
+            h = self.layer0(sum(Mnp))
+        elif self.init == 'meas':
+            h = self.layer0(meas)
+        elif self.init == 'meas_invariant':
+            h = self.gnn.init_h(meas)
+        else:
+            raise Exception('Error')
 
 
-#         pos_track = []
-#         for i in range(T):
-#             self.update_trans_model(x)
-#             if(HNL):
-#                 self.update_meas_model(x)
-#             if self.prior:
-#                 Mp_arr = self.p_messages(x, meas, x0)
-#                 # print(Mp_arr[0]+Mp_arr[2])
-#             else:
-#                 Mp_arr = []
-#             grad, h = self.gnn(h, operators, Mp_arr)
+        pos_track = []
+        for i in range(T):
+            self.update_trans_model(x)
+            if(HNL):
+                self.update_meas_model(x)
+            if self.prior:
+                Mp_arr = self.p_messages(x, meas, x0)
+                # print(Mp_arr[0]+Mp_arr[2])
+            else:
+                Mp_arr = []
+            grad, h = self.gnn(h, operators, Mp_arr)
 
-#             if self.learned and self.prior:
-#                 x = x + self.gamma * (grad + lr_coeff*sum(Mp_arr))
-#                 pos_track.append(self.state2pos(x).transpose(1, 2))
-#             elif self.learned and not self.prior:
-#                 pred = grad + meas
-#                 pos_track.append(pred.transpose(1, 2))
-#             elif not self.learned and self.prior:
-#                 x = x + self.gamma * (grad*0 + lr_coeff*sum(Mp_arr))
-#                 pos_track.append(self.state2pos(x).transpose(1, 2))
-#             else:  # not self.learned and not self.prior
-#                 pred = grad*0 + meas
-#                 pos_track.append(pred.transpose(1, 2))
+            if self.learned and self.prior:
+                x = x + self.gamma * (grad + lr_coeff*sum(Mp_arr))
+                pos_track.append(self.state2pos(x).transpose(1, 2))
+            elif self.learned and not self.prior:
+                pred = grad + meas
+                pos_track.append(pred.transpose(1, 2))
+            elif not self.learned and self.prior:
+                x = x + self.gamma * (grad*0 + lr_coeff*sum(Mp_arr))
+                pos_track.append(self.state2pos(x).transpose(1, 2))
+            else:  # not self.learned and not self.prior
+                pred = grad*0 + meas
+                pos_track.append(pred.transpose(1, 2))
 
-#         return pos_track
+        return pos_track
 
 
 def meas2inv(meas):

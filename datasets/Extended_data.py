@@ -15,18 +15,22 @@ else:
 ### Dataset path and noise statistics ###
 #########################################
 InitIsRandom = False
-compact_path_linear = "temp/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
+RotateH = True
+HNL = False #True for Non-linear observation h, False for linear H
+# compact_path_linear = "temp/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
+compact_path_linear = 'temp/H_rotated/2x2_Hrot10_rq-1010_T100.pt'
+   
 compact_path_lor_decimation = "temp/data_gen.pt"
 compact_path_lor_DT = "temp/T20_hNL/data_lor_v0_rq00_T20.pt"
-r2 = 1
+r2 = 10
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
 v = 10**(vdB/10)
 q2 = np.multiply(v,r2)
 q = np.sqrt(q2) # sigma
 
-opt_1overq2_dB = 8.2391
-opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
+# opt_1overq2_dB = 8.2391
+# opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
 
 ########################
 ### DataSet Settings ###
@@ -42,8 +46,8 @@ N_CV = 100
 N_T = 200
 
 # Sequence Length for Linear case
-T = 20
-T_test = 20
+T = 100
+T_test = 100
 # Sequence Length for NL lorenz case
 lor_T = 20
 lor_T_test = 20
@@ -58,8 +62,6 @@ lr_coeff = 1 # the ratio between GM message and GNN message
 ####################
 ### Non-linear h ###
 ####################
-
-HNL = False #True for Non-linear observation h, False for linear H
 
 def h_nonlinear(x):
     return torch.squeeze(toSpherical(x))
@@ -108,32 +110,48 @@ H10 = np.array([[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
 ############
 ## 2 x 2 ###
 ############
-# m = 2
-# n = 2
-# F = F10[0:m, 0:m]
-# H = np.eye(2)
-# m1_0 = np.array([0.0, 0.0], dtype=np.float32)
-# # m1x_0_design = torch.tensor([[10.0], [-10.0]])
-# m2_0 = 0 * 0 * np.eye(m)
+m = 2
+n = 2
+F = F10[0:m, 0:m]
+H = np.eye(2)
+m1_0 = np.array([0.0, 0.0], dtype=np.float32)
+# m1x_0_design = torch.tensor([[10.0], [-10.0]])
+m2_0 = 0 * 0 * np.eye(m)
 
+# Inaccurate model knowledge based on matrix rotation
+F_rotated = torch.zeros_like(F)
+H_rotated = torch.zeros_like(H)
+if(m==2):
+    alpha_degree = 10
+    rotate_alpha = torch.tensor([alpha_degree/180*torch.pi]).to(dev)
+    cos_alpha = torch.cos(rotate_alpha)
+    sin_alpha = torch.sin(rotate_alpha)
+    rotate_matrix = torch.tensor([[cos_alpha, -sin_alpha],
+                                [sin_alpha, cos_alpha]]).to(dev)
+    # print(rotate_matrix)
+    F_rotated = torch.mm(F,rotate_matrix) #inaccurate process model
+    H_rotated = torch.mm(H,rotate_matrix) #inaccurate observation model
+
+if RotateH:
+    H = H_rotated
 
 ################################
 ### 5 x 5, 10 x 10 and so on ###
 ################################
-m = 5
-n = 5
-## F in canonical form
-F = np.eye(m)
-F[0] = np.ones((1,m))
+# m = 5
+# n = 5
+# ## F in canonical form
+# F = np.eye(m)
+# F[0] = np.ones((1,m))
 
-## H in reverse canonical form
-H = np.zeros((n,n))
-H[0] = np.ones((1,n))
-for i in range(n):
-    H[i,n-1-i] = 1
+# ## H in reverse canonical form
+# H = np.zeros((n,n))
+# H[0] = np.ones((1,n))
+# for i in range(n):
+#     H[i,n-1-i] = 1
 
-m1_0 = np.zeros((m), dtype=np.float32)
-m2_0 = 0 * 0 * np.eye(m)
+# m1_0 = np.zeros((m), dtype=np.float32)
+# m2_0 = 0 * 0 * np.eye(m)
 
 
 
