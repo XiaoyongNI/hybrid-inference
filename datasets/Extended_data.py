@@ -21,8 +21,8 @@ HNL = False #True for Non-linear observation h, False for linear H
 compact_path_linear = 'simulations/Linear/H_rotated/2x2_Hrot10_rq020_T100.pt'
    
 compact_path_lor_decimation = "simulations/LA/data_gen.pt"
-compact_path_lor_DT = "simulations/LA/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
-r2 = 10
+compact_path_lor_DT = "simulations/LA/T100_Hrot1/data_lor_v20_rq020_T100.pt"
+r2 = 1
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
 v = 10**(vdB/10)

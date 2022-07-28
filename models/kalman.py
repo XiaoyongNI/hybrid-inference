@@ -3,6 +3,7 @@ from torch import autograd
 from filterpy.kalman import KalmanFilter as KF
 from filterpy.kalman import ExtendedKalmanFilter
 import math
+import torch
 
 class KalmanFilter():
     def __init__(self, A, H, Q, R, x_0, P_0):
@@ -76,7 +77,7 @@ class ExtendedKalman_lorenz():
         A_ = np.add(np.reshape(np.matmul(self.B, x),(3,3)).T,self.C)
 
         A = np.diag([1]*3).astype(np.float32)
-            
+             
         for i in range(1, self.K+1):
             A_add = (np.linalg.matrix_power(A_*self.dt, i)) / float(math.factorial(i))
             A = np.add(A, A_add)
@@ -93,11 +94,10 @@ class ExtendedKalman_lorenz():
 
         return self.rk.F, self.rk.Q
 
-
     def HJacobian_at(self, x):
         """ compute Jacobian of H matrix at x """
 
-        H_J = getJacobian(x, self.rk.H)
+        H_J = np.identity(3, dtype=np.float32)
 
         return H_J
 
@@ -141,7 +141,7 @@ class ExtendedKalman_lorenz():
             xs.append(self.rk.x)
             Ps.append(self.rk.P)
             self.rk.F = self.get_F(self.rk.x)
-            Fs.append(getJacobian(self.rk.x, self.rk.F))
+            Fs.append(self.rk.F)
             self.rk.predict()
 
         xs = np.array(xs)
@@ -151,13 +151,13 @@ class ExtendedKalman_lorenz():
         return M
 
 
-def getJacobian(x, g):
+# def getJacobian(x, g):
 
-    y = np.reshape(x.T,(x.shape[0]))
+#     y = np.reshape(x.T,(x.shape[0]))
 
-    Jac = autograd.functional.jacobian(g, y)
-    Jac = Jac.view(-1,3)
-    return Jac
+#     Jac = autograd.functional.jacobian(g, y)
+#     Jac = Jac.view(-1,3)
+#     return Jac
 
 def dot(a, b):
     return a @ b

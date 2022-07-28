@@ -1,0 +1,7 @@
+default settings
+lr_coeff = 1
+args.batch_size = 1
+args.init = 'meas_invariant'
+args.gamma = 0.005
+args.lr = 1e-3
+sweep_K = [5]
