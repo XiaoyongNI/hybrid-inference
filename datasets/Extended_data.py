@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import math
+from exp2_lorenz_KNet import decimation
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -29,8 +30,11 @@ v = 10**(vdB/10)
 q2 = np.multiply(v,r2)
 q = np.sqrt(q2) # sigma
 
-# opt_1overq2_dB = 8.2391
-# opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
+if decimation:
+    opt_1overq2_dB = 8.2391
+    opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
+else:
+    opt_q = q #DT case
 
 ########################
 ### DataSet Settings ###
