@@ -3,7 +3,7 @@ import numpy as np
 import settings
 import time
 import utils.directory_utils as d_utils
-from datasets.Extended_data import opt_q, r, q
+from datasets.Extended_data import opt_q, r, q, decimation
 
 print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
 print("1/q2 [dB]: ", 10 * np.log10(1/q**2))
@@ -16,7 +16,6 @@ args.init = 'meas_invariant'
 args.gamma = 0.005
 args.lr = 1e-3
 sweep_K = [5]
-decimation = False # true for decimation case, false for DT case
 delta_t = 0.02 # dt passed to the model
 
 d_utils.init_folders(args.exp_name)

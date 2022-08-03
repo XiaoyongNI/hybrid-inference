@@ -1,14 +1,22 @@
 default settings
-lr_coeff = 1
-args.batch_size = 1
-args.init = 'meas_invariant'
+lr_coeff = 1,args.batch_size = 1,args.init = 'meas_invariant',sweep_K = [5]
+
 args.gamma = 0.005
 args.lr = 1e-3
-sweep_K = [5]
+
 rq-1010
+MSE LOSS: tensor(-1.9206) [dB]
+MSE LOSS std: tensor(0.9615) [dB]
+Inference Time: 255.66743421554565
+Test loss: 0.6426
 
 rq020: args.gamma = 0.0005
 'hybrid val': [-7.483740057319781, -7.548334030546801, -7.638932893270461, -8.118856128944378, -8.631266648589516, -9.463704625738771, -9.953565015422026, -10.16358431767463, -10.619854937096733, -11.286739021140422, -11.957567148496409]
+MSE LOSS: tensor(-11.9593) [dB]
+MSE LOSS std: tensor(1.3083) [dB]
+Inference Time: 250.25896978378296
+Test loss: 0.0637
 
+rq1030: args.gamma = 5e-5
 
-
+rq2040: args.gamma = 5e-5

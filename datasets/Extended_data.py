@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import math
-from exp2_lorenz_KNet import decimation
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -20,7 +19,7 @@ RotateH = False
 HNL = False #True for Non-linear observation h, False for linear H
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/H_rotated/2x2_Hrot10_rq020_T100.pt'
-   
+decimation = False # true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/data_gen.pt"
 compact_path_lor_DT = "simulations/LA/T100_Hrot1/data_lor_v20_rq020_T100.pt"
 r2 = 1
