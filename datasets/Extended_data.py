@@ -18,7 +18,7 @@ InitIsRandom = False
 RotateH = False
 HNL = False #True for Non-linear observation h, False for linear H
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
-compact_path_linear = 'simulations/Linear/H_rotated/2x2_Hrot10_rq020_T100.pt'
+compact_path_linear = 'simulations/Linear/Scaling_to_large_models/2x2_rq020_T20.pt'
 decimation = False # true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/data_gen.pt"
 compact_path_lor_DT = "simulations/LA/T100_Hrot1/data_lor_v20_rq020_T100.pt"
@@ -49,8 +49,8 @@ N_CV = 100
 N_T = 200
 
 # Sequence Length for Linear case
-T = 100
-T_test = 100
+T = 20
+T_test = 20
 # Sequence Length for NL lorenz case
 lor_T = 100
 lor_T_test = 100
