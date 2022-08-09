@@ -80,6 +80,8 @@ def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True,test
         try:        
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
             print("Load network from previous training")
+            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+            print("Number of parameters for Hybrid model: ",NumofParameter)  
         except:
             net = gnn.GNN_Kalman(args, A, H, Q, R, dataset_train.x0,  dataset_train.P0, nf=args.nf,
                                 prior=args.prior,  learned=args.learned, init=args.init, gamma=args.gamma).to(device)
@@ -176,6 +178,8 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
         try:        
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
             print("Load network from previous training")
+            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+            print("Number of parameters for Hybrid model: ",NumofParameter)  
         except:
             net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
             print("Initialize Network")
