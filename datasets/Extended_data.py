@@ -18,8 +18,8 @@ InitIsRandom = False
 RotateH = False
 HNL = False #True for Non-linear observation h, False for linear H
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
-compact_path_linear = 'simulations/Linear/Scaling_to_large_models/2x2_rq020_T20.pt'
-decimation = False # true for decimation case, false for DT case
+compact_path_linear = 'simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt'
+decimation = False # Lorenz: true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/data_gen.pt"
 compact_path_lor_DT = "simulations/LA/T100_Hrot1/data_lor_v20_rq020_T100.pt"
 r2 = 1
@@ -113,48 +113,48 @@ H10 = np.array([[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
 ############
 ## 2 x 2 ###
 ############
-m = 2
-n = 2
-F = F10[0:m, 0:m]
-H = np.eye(2)
-m1_0 = np.array([0.0, 0.0], dtype=np.float32)
-# m1x_0_design = torch.tensor([[10.0], [-10.0]])
-m2_0 = 0 * 0 * np.eye(m)
+# m = 2
+# n = 2
+# F = F10[0:m, 0:m]
+# H = np.eye(2)
+# m1_0 = np.array([0.0, 0.0], dtype=np.float32)
+# # m1x_0_design = torch.tensor([[10.0], [-10.0]])
+# m2_0 = 0 * 0 * np.eye(m)
 
-# Inaccurate model knowledge based on matrix rotation
-F_rotated = np.zeros_like(F)
-H_rotated = np.zeros_like(H)
-if(m==2):
-    alpha_degree = 10
-    rotate_alpha = np.array([alpha_degree/180*np.pi])
-    cos_alpha = np.cos(rotate_alpha)
-    sin_alpha = np.sin(rotate_alpha)
-    rotate_matrix = np.array([[cos_alpha, -sin_alpha],
-                                [sin_alpha, cos_alpha]])
-    # print(rotate_matrix)
-    F_rotated = np.matmul(F,rotate_matrix) #inaccurate process model
-    H_rotated = np.matmul(H,rotate_matrix) #inaccurate observation model
+# # Inaccurate model knowledge based on matrix rotation
+# F_rotated = np.zeros_like(F)
+# H_rotated = np.zeros_like(H)
+# if(m==2):
+#     alpha_degree = 10
+#     rotate_alpha = np.array([alpha_degree/180*np.pi])
+#     cos_alpha = np.cos(rotate_alpha)
+#     sin_alpha = np.sin(rotate_alpha)
+#     rotate_matrix = np.array([[cos_alpha, -sin_alpha],
+#                                 [sin_alpha, cos_alpha]])
+#     # print(rotate_matrix)
+#     F_rotated = np.matmul(F,rotate_matrix) #inaccurate process model
+#     H_rotated = np.matmul(H,rotate_matrix) #inaccurate observation model
 
-if RotateH:
-    H = np.squeeze(H_rotated)
+# if RotateH:
+#     H = np.squeeze(H_rotated)
 
 ################################
 ### 5 x 5, 10 x 10 and so on ###
 ################################
-# m = 5
-# n = 5
-# ## F in canonical form
-# F = np.eye(m)
-# F[0] = np.ones((1,m))
+m = 5
+n = 5
+## F in canonical form
+F = np.eye(m)
+F[0] = np.ones((1,m))
 
-# ## H in reverse canonical form
-# H = np.zeros((n,n))
-# H[0] = np.ones((1,n))
-# for i in range(n):
-#     H[i,n-1-i] = 1
+## H in reverse canonical form
+H = np.zeros((n,n))
+H[0] = np.ones((1,n))
+for i in range(n):
+    H[i,n-1-i] = 1
 
-# m1_0 = np.zeros((m), dtype=np.float32)
-# m2_0 = 0 * 0 * np.eye(m)
+m1_0 = np.zeros((m), dtype=np.float32)
+m2_0 = 0 * 0 * np.eye(m)
 
 
 

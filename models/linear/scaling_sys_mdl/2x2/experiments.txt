@@ -1,0 +1,26 @@
+Exp1 H=I gamma = 0.003, lr_coeff = 1, lr=1e-3
+ 'hybrid val': [-10.099856946032979, -10.2410527449343, -10.423892856169745, -10.420710743947614, -10.496344686424885, -10.622313258213037, -10.626714458028237, -10.602878109452226, -10.644100898841009]
+MSE LOSS: tensor(-10.0159) [dB]
+MSE LOSS std: tensor(2.3308) [dB]
+Inference Time: 20.062501430511475
+Test loss: 0.0996
+
+try gamma = 0.03 nan
+
+try gamma = 0.01 nan
+
+try gamma = 5e-3 nan
+
+try gamma = 4e-3 nan
+
+try gamma = 2e-3 
+MSE LOSS: tensor(-9.8552) [dB]
+MSE LOSS std: tensor(2.1219) [dB]
+
+try gamma = 1e-3 
+MSE LOSS: tensor(-9.3466) [dB]
+MSE LOSS std: tensor(2.0268) [dB]
+
+try gamma = 1e-4
+MSE LOSS: tensor(-6.6370) [dB]
+MSE LOSS std: tensor(1.4986) [dB]

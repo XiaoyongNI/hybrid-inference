@@ -326,7 +326,8 @@ class GNN_Kalman(nn.Module):
         return torch.tensor(in_state.data)
 
     def state2pos(self, state):
-        return torch.bmm(self.H_b, state)
+        # return torch.bmm(self.H_b, state)
+        return state
 
     def forward(self, input, x0, T=50, ts=None):
         self.ts = ts

@@ -119,7 +119,7 @@ if __name__ == '__main__':
         print('')
     
     print("\n######## \nTest Hybrid: start\n########\n")
-    test_error = hybrid(best_sigma, data=n_samples, epochs=1,test_time=True)
+    test_error = hybrid(best_sigma, epochs=1,test_time=True)
     test_error_dB = 10 * np.log10(test_error)
     results['hybrid test'].append(test_error_dB)
     print('\nResults %s'% str(results))
