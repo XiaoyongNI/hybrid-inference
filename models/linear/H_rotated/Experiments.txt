@@ -7,6 +7,15 @@ MSE LOSS: tensor(19.7407) [dB]
 MSE LOSS std: tensor(3.2415) [dB]
 Inference Time: 25.178355932235718
 Test loss: 94.2052
+————————————————————————
+update state2pos
+Full
+gamma = 0.03, lr = 1e-3
+'hybrid val': [-1.3986400808644492, -1.3987793965435382, -1.4530158981231764, -1.4559456890233269, -1.4559456890233269, -1.4773346506242646, -1.6765400454189663, -1.6760134049028206, -1.7558412557138856]
+MSE LOSS: tensor(-1.4168) [dB]
+MSE LOSS std: tensor(1.2444) [dB]
+Inference Time: 25.894899129867554
+Test loss: 0.7216
 
 Partial
 gamma = 0.03, lr = 1e-3
@@ -25,6 +34,15 @@ MSE LOSS: tensor(8.5403) [dB]
 MSE LOSS std: tensor(3.3636) [dB]
 Inference Time: 27.39245915412903
 Test loss: 7.1455
+————————————————————————
+update state2pos
+Full
+gamma = 0.003, lr = 1e-3
+'hybrid val': [-11.393342704302416, -11.437674047424949, -11.494057915733705, -11.552817696288724, -11.572446124242909, -11.60729352342928, -11.606719656529405, -11.628429431608502, -11.657845196373163]
+MSE LOSS: tensor(-11.3967) [dB]
+MSE LOSS std: tensor(1.2481) [dB]
+Inference Time: 28.48732042312622
+Test loss: 0.0725
 
 Partial
 gamma = 0.003, lr = 1e-3
@@ -44,6 +62,15 @@ MSE LOSS: tensor(-0.2490) [dB]
 MSE LOSS std: tensor(4.1968) [dB]
 Inference Time: 25.71001625061035
 Test loss: 0.9443
+————————————————————————
+update state2pos
+Full
+gamma = 0.0003, lr = 1e-3
+'hybrid val': [-21.110531812556346, -21.15775395029074, -21.16105381644791, -21.160942318543896, -21.160942318543896, -21.21318757152401, -21.218271283822556, -21.32380560898085, -21.32384730366414]
+MSE LOSS: tensor(-21.3826) [dB]
+MSE LOSS std: tensor(1.1477) [dB]
+Inference Time: 26.508415460586548
+Test loss: 0.0073
 
 Partial
 gamma = 0.0003, lr = 1e-3
@@ -55,6 +82,10 @@ Test loss: 0.0082
 
 rq2040
 
+Full
+gamma = 3e-5, lr = 1e-3
+————————————————————————
+update state2pos
 Full
 gamma = 3e-5, lr = 1e-3
 
@@ -75,6 +106,10 @@ MSE LOSS: tensor(-20.1632) [dB]
 MSE LOSS std: tensor(3.2654) [dB]
 Inference Time: 26.102816343307495
 Test loss: 0.0096
+————————————————————————
+update state2pos
+Full
+gamma = 3e-6, lr = 1e-3
 
 Partial
 gamma = 3e-6, lr = 1e-3

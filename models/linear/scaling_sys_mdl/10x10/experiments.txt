@@ -20,3 +20,13 @@ MSE LOSS: tensor(-1.1256) [dB]
 MSE LOSS std: tensor(2.0214) [dB]
 Inference Time: 21.004375457763672
 Test loss: 0.7717
+
+_______________________________________________________
+change function state2pos
+
+Exp4 H=reverse_canonical_form, gamma = 0.0003, lr_coeff = 1, lr=1e-3
+ 'hybrid val': [9.65327170445913, 9.42807692796599, 4.713541183440647, 0.462144118450275, -5.01687230705873, -6.717185140055339, -8.475140324165798, -8.787249707304927, -8.77871335915226]
+MSE LOSS: tensor(-8.6740) [dB]
+MSE LOSS std: tensor(0.8028) [dB]
+Inference Time: 20.700515031814575
+Test loss: 0.1357

@@ -1,0 +1,45 @@
+rq-1010
+
+Full
+gamma = 0.03, lr = 1e-3
+
+
+Partial
+gamma = 0.03, lr = 1e-3
+
+
+rq020
+
+Full
+gamma = 0.003, lr = 1e-3
+
+Partial
+gamma = 0.003, lr = 1e-3
+
+
+
+rq1030
+
+Full
+gamma = 0.0003, lr = 1e-3
+
+Partial
+gamma = 0.0003, lr = 1e-3
+
+rq2040
+
+Full
+gamma = 3e-5, lr = 1e-3
+
+
+Partial
+gamma = 3e-5, lr = 1e-3
+
+rq3050
+
+Full
+gamma = 3e-6, lr = 1e-3
+
+
+Partial
+gamma = 3e-6, lr = 1e-3
