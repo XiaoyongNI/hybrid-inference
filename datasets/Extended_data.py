@@ -130,8 +130,8 @@ if(m==2):
     rotate_alpha = np.array([alpha_degree/180*np.pi])
     cos_alpha = np.cos(rotate_alpha)
     sin_alpha = np.sin(rotate_alpha)
-    rotate_matrix = np.array([[cos_alpha, -sin_alpha],
-                                [sin_alpha, cos_alpha]])
+    rotate_matrix = np.squeeze(np.array([[cos_alpha, -sin_alpha],
+                                [sin_alpha, cos_alpha]]))
     # print(rotate_matrix)
     F_rotated = np.matmul(F,rotate_matrix) #inaccurate process model
     H_rotated = np.matmul(H,rotate_matrix) #inaccurate observation model
