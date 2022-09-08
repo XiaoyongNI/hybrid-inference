@@ -1,3 +1,7 @@
+sweep_samples = np.array([10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 10000]) * 50
+epochs_arr = [40, 40, 60, 50, 50, 50, 40, 50, 50, 40, 25]
+lr_arr = [lr_base/10, lr_base/5, lr_base/2] + [lr_base] * (len(epochs_arr) - 5)
+
 rq-1010
 
 Full
@@ -88,6 +92,11 @@ gamma = 3e-5, lr = 1e-3
 update state2pos
 Full
 gamma = 3e-5, lr = 1e-3
+'hybrid val': [-31.13052494616092, -31.14337459997109, -31.274782832141597, -31.31420058521355, -31.314408944195975, -31.34892580490472, -31.370419899387805, -31.373673099771537, -31.40474554307307]
+MSE LOSS: tensor(-31.5446) [dB]
+MSE LOSS std: tensor(1.2519) [dB]
+Inference Time: 25.584051370620728
+Test loss: 0.0007
 
 Partial
 gamma = 3e-5, lr = 1e-3

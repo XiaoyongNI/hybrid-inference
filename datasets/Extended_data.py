@@ -16,13 +16,13 @@ else:
 #########################################
 InitIsRandom = False
 RotateH = False
-RotateF = True
+RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/F_rotated/2x2_Frot10_rq-1010_T20.pt'
 decimation = False # Lorenz: true for decimation case, false for DT case
-compact_path_lor_decimation = "simulations/LA/data_gen.pt"
-compact_path_lor_DT = "simulations/LA/T100_Hrot1/data_lor_v20_rq020_T100.pt"
+compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
+compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq020_T100.pt"
 r2 = 10
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
@@ -53,12 +53,12 @@ N_T = 1000
 T = 20
 T_test = 20
 # Sequence Length for NL lorenz case
-lor_T = 100
-lor_T_test = 100
+lor_T = 3000
+lor_T_test = 3000
 
 m1_x0 = np.array([1., 1., 1.]).astype(np.float32) # initial x0
 m2_x0 = np.diag([1] * 3) * 0 # initial P0
-delta_t = 0.02 # dt that generates the dataset
+delta_t = 1e-5 # dt that generates the dataset
 sample_delta_t = 0.02 # sampling dt
 
 lr_coeff = 1 # the ratio between GM message and GNN message

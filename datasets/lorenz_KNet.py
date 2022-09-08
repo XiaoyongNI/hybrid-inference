@@ -30,11 +30,9 @@ class LORENZ(data.Dataset):
 
         if decimation:
             print("load decimated Lorenz Attractor data!")
-            data_gen_file = torch.load(compact_path_lor_decimation,map_location=torch.device("cpu"))
-            [true_sequence] = data_gen_file['All Data']
+            [train_input, train_target, cv_input, cv_target, test_input, test_target] = torch.load(compact_path_lor_decimation,map_location=torch.device("cpu"))
             ### self.data = list[state, meas]
             if self.partition == 'train':
-                [train_target, train_input] = Decimate_and_perturbate_Data(true_sequence, self.dt, self.sample_dt, N_E, self.h, self.lamb)
                 ### Convert to np array and float64 type
                 train_input = train_input.numpy().astype(np.float64)
                 train_target = train_target.numpy().astype(np.float64)
@@ -49,7 +47,6 @@ class LORENZ(data.Dataset):
                 self.data = datalist
 
             if self.partition == 'val':
-                [cv_target, cv_input] = Decimate_and_perturbate_Data(true_sequence, self.dt, self.sample_dt, N_CV, self.h, self.lamb)
                 ### Convert to np array and float64 type
                 cv_input = cv_input.numpy().astype(np.float64)
                 cv_target = cv_target.numpy().astype(np.float64)
@@ -60,7 +57,6 @@ class LORENZ(data.Dataset):
                 self.data = datalist
 
             if self.partition == 'test':
-                [test_target, test_input] = Decimate_and_perturbate_Data(true_sequence, self.dt, self.sample_dt, N_T, self.h, self.lamb)
                 ### Convert to np array and float64 type
                 test_input = test_input.numpy().astype(np.float64)
                 test_target = test_target.numpy().astype(np.float64)

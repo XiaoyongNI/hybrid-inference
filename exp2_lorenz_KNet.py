@@ -15,7 +15,7 @@ args.batch_size = 1
 args.init = 'meas_invariant'
 args.gamma = 0.005
 args.lr = 1e-3
-sweep_K = [5]
+sweep_K = [2] # Taylor Expansion order of state evolution model f
 delta_t = 0.02 # dt passed to the model
 
 d_utils.init_folders(args.exp_name)
@@ -70,15 +70,12 @@ def kalman(K=5, data=1000):
     args.prior = True
     args.epochs = 0
     opt_test = 1e8
-    if decimation:
-        for sigma in np.linspace(np.maximum(0.01,opt_q-1), opt_q+1, 5):         
-            print("Sigma: %.4f, \t lamb: %.4f" % (sigma, r))
-            _, test_loss = main.main_lorenz_kalman(args, sigma=sigma, lamb=r, K=K,decimation=decimation)
-            if test_loss < opt_test:
-                opt_test = test_loss
-                opt_sigma = sigma
-                opt_lamb = r
-
+    if decimation:                
+        print("Sigma: %.4f, \t lamb: %.4f" % (opt_q, r))
+        _, test_loss = main.main_lorenz_kalman(args, sigma=opt_q, lamb=r, K=K,decimation=decimation)
+        opt_test = test_loss
+        opt_sigma = opt_q
+        opt_lamb = r
         print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
         return opt_sigma, opt_test
 
