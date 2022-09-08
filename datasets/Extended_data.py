@@ -20,10 +20,10 @@ RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/F_rotated/2x2_Frot10_rq-1010_T20.pt'
-decimation = False # Lorenz: true for decimation case, false for DT case
+decimation = True # Lorenz: true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
 compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq020_T100.pt"
-r2 = 10
+r2 = 1
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
 v = 10**(vdB/10)
@@ -31,8 +31,9 @@ q2 = np.multiply(v,r2)
 q = np.sqrt(q2) # sigma
 
 if decimation:
-    opt_1overq2_dB = 8.2391
-    opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
+    # opt_1overq2_dB = 8.2391
+    # opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
+    opt_q = 0.3873
 else:
     opt_q = q #DT case
 
@@ -41,13 +42,13 @@ else:
 ########################
 
 # Number of Training Examples
-N_E = 1000
+N_E = 100
 
 # Number of Cross Validation Examples
-N_CV = 100
+N_CV = 5
 
 # Number of Test Examples
-N_T = 1000
+N_T = 10
 
 # Sequence Length for Linear case
 T = 20

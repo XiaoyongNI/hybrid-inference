@@ -1,0 +1,13 @@
+default settings
+lr_coeff = 1,args.batch_size = 1,args.init = 'meas_invariant',sweep_K = [2]
+
+args.gamma = 0.005
+args.lr = 1e-3
+
+Exp1 opt_q = 0.3
+start time:8.Sept 21:54
+MSE LOSS: tensor(-9.2719) [dB]
+MSE LOSS std: tensor(0.1442) [dB]
+
+
+
