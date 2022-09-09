@@ -71,7 +71,7 @@ def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True,test
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
         except:
             print("Error loading the trained model!!!")
-        test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False)
+        test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False,test_time=True)
 
         print("Test loss: %.4f" % (test_mse))
         return test_mse.item()
@@ -169,8 +169,8 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
         except:
             print("Error loading the trained model!!!")
-        test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz)
-
+        test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False, plot_lorenz=plot_lorenz,test_time=True)
+        
         print("Test loss: %.4f" % (test_mse))
         return test_mse.item()
     

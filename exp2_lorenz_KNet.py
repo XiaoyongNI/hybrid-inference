@@ -5,6 +5,8 @@ import time
 import utils.directory_utils as d_utils
 from datasets.Extended_data import opt_q, r, q, decimation
 
+import wandb
+
 print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
 print("1/q2 [dB]: ", 10 * np.log10(1/q**2))
 
@@ -17,6 +19,13 @@ args.gamma = 0.005
 args.lr = 1e-3
 sweep_K = [2] # Taylor Expansion order of state evolution model f
 delta_t = 0.02 # dt passed to the model
+
+wandb.init(project="decimation_r0J2")
+wandb.config = {
+  "learning_rate": args.lr,
+  "gamma": args.gamma,
+  "process_noise_q": opt_q
+}
 
 d_utils.init_folders(args.exp_name)
 d_utils.copy_file('exp2_lorenz.py', 'logs/%s/%s' % (args.exp_name, 'exp2_lorenz.py'))
@@ -198,5 +207,6 @@ if __name__ == '__main__':
         #         print('')
         d_utils.write_file('logs/%s/%s.txt' % (args.exp_name, key), str(results))
 
-
+# Close wandb run 
+wandb.finish()
         
