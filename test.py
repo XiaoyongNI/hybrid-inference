@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import losses
 from datasets import nclt
 from datasets import synthetic
-from datasets import lorenz
+from datasets import lorenz_KNet as lorenz
 import numpy as np
 from utils import generic_utils as g_utils
 import time

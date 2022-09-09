@@ -20,12 +20,12 @@ args.lr = 1e-3
 sweep_K = [2] # Taylor Expansion order of state evolution model f
 delta_t = 0.02 # dt passed to the model
 
-wandb.init(project="decimation_r0J2")
-wandb.config = {
+wandb.init(project="Hybrid_Inference")
+wandb.log({
   "learning_rate": args.lr,
   "gamma": args.gamma,
   "process_noise_q": opt_q
-}
+})
 
 d_utils.init_folders(args.exp_name)
 d_utils.copy_file('exp2_lorenz.py', 'logs/%s/%s' % (args.exp_name, 'exp2_lorenz.py'))

@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from scipy.integrate import odeint
 import torch.utils.data as data
 import torch
@@ -283,11 +284,24 @@ def plot_trajectory(args, states, mse=0.):
     if not os.path.exists('plots/%s' % path):
         os.makedirs('plots/%s' % path)
 
-    fig = plt.figure(linewidth=0.0)
-    ax = fig.gca(projection='3d')
-    ax.plot(states[:, 0], states[:, 1], states[:, 2], linewidth=0.5)
-    plt.axis('off')
-    plt.savefig('plots/%s/tr_samples_%d_loss_%.4f.png' % (path, args.tr_samples, mse))
+    # fig = plt.figure(linewidth=0.0)
+    # ax = fig.gca(projection='3d')
+    # ax.plot(states[:, 0], states[:, 1], states[:, 2], linewidth=0.5)
+    # plt.axis('off')
+    # plt.savefig('plots/%s/tr_samples_%d_loss_%.4f.png' % (path, args.tr_samples, mse))
+
+    fig = plt.figure(figsize=(15, 10))
+    plt.Axes (fig, [0,0,1,1])
+    gs1 = gridspec.GridSpec(3,2)
+    gs1.update(wspace=0, hspace=0)
+    plt.rcParams["figure.frameon"] = False
+    plt.rcParams["figure.constrained_layout.use"]= True
+    i=0
+    ax = fig.add_subplot(gs1[i],projection='3d')
+    c = 'purple'
+    ax.set_axis_off()
+    ax.plot(states[:, 0], states[:, 1], states[:, 2], c, linewidth=0.5)
+    plt.savefig('plots/%s/tr_samples_%d_loss_%.4f.png' % (path, args.tr_samples, mse), bbox_inches='tight', pad_inches=0, dpi=1000)
 
 class MeasurementModel():
     def __init__(self, H, R):
