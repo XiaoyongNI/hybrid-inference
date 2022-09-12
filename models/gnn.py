@@ -5,7 +5,7 @@ import numpy as np
 from torch.nn.modules.module import Module
 from torch import autograd
 import math
-from datasets.Extended_data import lr_coeff, HNL, h_nonlinear, m1_x0, m2_x0
+from datasets.Extended_data import lr_coeff, HNL, h_nonlinear, m1_x0, m2_x0, RotateH, H_lor_rotated
 
 
 
@@ -414,6 +414,8 @@ class Hybrid_lorenz(GNN_Kalman):
         if(HNL):### if h is NL, use Jacobian matrix of h(x)
             H = self.getJacobian(x, h_nonlinear)
             H = H.detach().cpu().numpy()
+        elif(RotateH):
+            H = H_lor_rotated
         else:
             H = np.diag([1]*3)
         return H, R, R_inv

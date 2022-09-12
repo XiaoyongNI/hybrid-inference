@@ -3,12 +3,12 @@ import numpy as np
 import settings
 import time
 import utils.directory_utils as d_utils
-from datasets.Extended_data import opt_q, r, q, decimation
+from datasets.Extended_data import opt_q, r, decimation
 
 import wandb
 
 print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
-print("1/q2 [dB]: ", 10 * np.log10(1/q**2))
+print("1/q2 [dB]: ", 10 * np.log10(1/opt_q**2))
 
 args = settings.get_settings()
 args.exp_name = str(time.time())+'_lorenz_K%d' % args.taylor_K
@@ -17,7 +17,7 @@ args.batch_size = 1
 args.init = 'meas_invariant'
 args.gamma = 0.005
 args.lr = 1e-3
-sweep_K = [2] # Taylor Expansion order of state evolution model f
+sweep_K = [5] # Taylor Expansion order of state evolution model f
 delta_t = 0.02 # dt passed to the model
 
 wandb.init(project="Hybrid_Inference")
@@ -63,10 +63,10 @@ def only_prior(K=5, data=1000):
         return opt_sigma, opt_test
 
     else:
-        print("Sigma: %.4f, \t lamb: %.4f" % (q, r))
-        _, test_loss = main.main_lorenz_hybrid(args, sigma=q, lamb=r,dt=delta_t,K=K,decimation=decimation)
+        print("Sigma: %.4f, \t lamb: %.4f" % (opt_q, r))
+        _, test_loss = main.main_lorenz_hybrid(args, sigma=opt_q, lamb=r,dt=delta_t,K=K,decimation=decimation)
         opt_test = test_loss
-        opt_sigma = q
+        opt_sigma = opt_q
         opt_lamb = r
         print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
         return opt_sigma, opt_test
@@ -89,10 +89,10 @@ def kalman(K=5, data=1000):
         return opt_sigma, opt_test
 
     else:
-        print("Sigma: %.4f, \t lamb: %.4f" % (q, r))
-        _, test_loss = main.main_lorenz_kalman(args, sigma=q, lamb=r,dt=delta_t,K=K,decimation=decimation)
+        print("Sigma: %.4f, \t lamb: %.4f" % (opt_q, r))
+        _, test_loss = main.main_lorenz_kalman(args, sigma=opt_q, lamb=r,dt=delta_t,K=K,decimation=decimation)
         opt_test = test_loss
-        opt_sigma = q
+        opt_sigma = opt_q
         opt_lamb = r
         print("Sigma: %.4f, \t lamb: %.4f, \t Test_loss %.4f" % (opt_sigma, opt_lamb, opt_test))
         return opt_sigma, opt_test
@@ -163,10 +163,9 @@ if __name__ == '__main__':
                 # test_error_dB = 10 * np.log10(test_error)
                 # results['prior'].append(test_error_dB)
                 # print("\n######## \nOnly prior: end\n########\n")
-                if decimation:
-                    best_sigma = opt_q
-                else:# DT case
-                    best_sigma = q
+
+                best_sigma = opt_q
+                
                 print("\n######## \nTrain Hybrid: start\n########\n")
                 val_error = hybrid(best_sigma, epochs, K=K, data=n_samples,test_time=False)
                 val_error_dB = 10 * np.log10(val_error)

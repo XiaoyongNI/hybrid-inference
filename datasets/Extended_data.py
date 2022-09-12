@@ -15,15 +15,15 @@ else:
 ### Dataset path and noise statistics ###
 #########################################
 InitIsRandom = False
-RotateH = False
+RotateH = True
 RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/F_rotated/2x2_Frot10_rq-1010_T20.pt'
-decimation = True # Lorenz: true for decimation case, false for DT case
+decimation = False # Lorenz: true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
-compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq020_T100.pt"
-r2 = 1
+compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
+r2 = 10
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
 v = 10**(vdB/10)
@@ -42,31 +42,32 @@ else:
 ########################
 
 # Number of Training Examples
-N_E = 100
+N_E = 1000
 
 # Number of Cross Validation Examples
-N_CV = 5
+N_CV = 100
 
 # Number of Test Examples
-N_T = 10
+N_T = 200
 
 # Sequence Length for Linear case
 T = 20
 T_test = 20
 # Sequence Length for NL lorenz case
-lor_T = 3000
-lor_T_test = 3000
+lor_T = 100
+lor_T_test = 100
 
+# Init condition and delta_t for Lorenz
 m1_x0 = np.array([1., 1., 1.]).astype(np.float32) # initial x0
 m2_x0 = np.diag([1] * 3) * 0 # initial P0
-delta_t = 1e-5 # dt that generates the dataset
+delta_t = 0.02 # dt that generates the dataset
 sample_delta_t = 0.02 # sampling dt
 
 lr_coeff = 1 # the ratio between GM message and GNN message
 
-####################
-### Non-linear h ###
-####################
+###########################
+### Non-linear case h/H ###
+###########################
 
 def h_nonlinear(x):
     return torch.squeeze(toSpherical(x))
@@ -83,7 +84,29 @@ def toSpherical(cart):
 
     return spher
 
+H_design = np.diag([1]*3)
+## Angle of rotation in the 3 axes
+roll_deg = yaw_deg = pitch_deg = 1
 
+roll = roll_deg * (math.pi/180)
+yaw = yaw_deg * (math.pi/180)
+pitch = pitch_deg * (math.pi/180)
+
+RX = np.array([
+                [1, 0, 0],
+                [0, math.cos(roll), -math.sin(roll)],
+                [0, math.sin(roll), math.cos(roll)]])
+RY = np.array([
+                [math.cos(pitch), 0, math.sin(pitch)],
+                [0, 1, 0],
+                [-math.sin(pitch), 0, math.cos(pitch)]])
+RZ = np.array([
+                [math.cos(yaw), -math.sin(yaw), 0],
+                [math.sin(yaw), math.cos(yaw), 0],
+                [0, 0, 1]])
+
+RotMatrix = np.matmul(np.matmul(RZ, RY), RX)
+H_lor_rotated = np.matmul(RotMatrix,H_design)
 
 
 
