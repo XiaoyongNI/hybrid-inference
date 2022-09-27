@@ -179,9 +179,21 @@ class GNN_Kalman(nn.Module):
         self.A = self.np2torch(A)
         self.H = self.np2torch(H)
         self.Q = self.np2torch(Q)
-        self.Q_inv = self.np2torch(np.linalg.inv(Q))
+        try:
+            self.Q_inv = self.np2torch(np.linalg.inv(Q))
+        except:# if CV model, Q is singular
+            inverse = np.zeros_like(Q)
+            inverse[0:2,0:2] = np.linalg.inv(Q[0:2,0:2]) # CV: only invert the first 2x2 block
+            self.Q_inv = self.np2torch(inverse)
+
         self.R = self.np2torch(R)
-        self.R_inv = self.np2torch(np.linalg.inv(R))
+        try:
+            self.R_inv = self.np2torch(np.linalg.inv(R))
+        except:# if only observe position, H is singular
+            inverse = R
+            inverse[0,0] = 1/R[0,0]
+            self.R_inv = self.np2torch(inverse)
+
         self.init = init
 
         # Initial state

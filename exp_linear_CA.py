@@ -4,6 +4,8 @@ import numpy as np
 import utils.directory_utils as d_utils
 import time
 
+import wandb # Optional: record results to wandb
+
 args = settings.get_settings()
 args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
@@ -16,6 +18,12 @@ args.lr = 1e-3
 args.K = 100
 args.prior = True
 args.learned = True
+
+wandb.init(project="Hybrid_Inference_LinearCA")
+wandb.log({
+  "learning_rate": args.lr,
+  "gamma": args.gamma,
+})
    
 print(args)
 lr_base = float(args.lr)
@@ -35,7 +43,7 @@ def baseline():
     args.prior = False
     args.learned = False
     args.epochs = 1
-    _, test = main_KNet.synthetic_hybrid(args)
+    _, test = main_KNet.CA_hybrid(args)
     print("\n######## \nBaseline: end\n########\n")
     return test
 
@@ -57,7 +65,7 @@ def baseline():
 #     return best_sigma, test_error
 
 def kalman_optimal():
-    _, test = main_KNet.main_synhtetic_kalman(args, sigma=q, lamb=r, val_on_train=False, optimal=True)
+    _, test = main_KNet.main_CA_kalman(args, val_on_train=False, optimal=True)
     return test
 
 
@@ -67,9 +75,9 @@ def hybrid(data=100, epochs=1,test_time=False):
     args.val_samples = int(data - args.tr_samples)
     args.epochs = epochs
     if test_time:
-        mse = main_KNet.synthetic_hybrid(args,test_time=True)
+        mse = main_KNet.CA_hybrid(args,test_time=True)
     else:
-        mse = main_KNet.synthetic_hybrid(args,test_time=False)
+        mse = main_KNet.CA_hybrid(args,test_time=False)
     return mse
 
 
@@ -82,10 +90,10 @@ if __name__ == '__main__':
 
     #results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
      ## Kalman Smoother Optimal ##
-    print("\n######## \nKalman Optimal: start\n########\n")
-    test_error = kalman_optimal()
-    results['kalman_optimal'].append(test_error)
-    print("\n######## \nKalman Optimal: end\n########\n")
+    # print("\n######## \nKalman Optimal: start\n########\n")
+    # test_error = kalman_optimal()
+    # results['kalman_optimal'].append(test_error)
+    # print("\n######## \nKalman Optimal: end\n########\n")
 
     for n_samples, epochs, lr in zip(sweep_samples, epochs_arr, lr_arr):
         args.lr = lr
@@ -121,5 +129,8 @@ if __name__ == '__main__':
     print('')
 
     d_utils.write_file('logs/%s/log.txt' % (args.exp_name), str(results))
+
+# Close wandb run 
+wandb.finish()
 
 

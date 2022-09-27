@@ -123,10 +123,10 @@ def main_CA_kalman(args, val_on_train=False, optimal=False, load = True):
                                        equations="CA", gnn_format=True, load = load)
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
-    (A, H, Q, R) = synthetic_KNet.create_model_parameters_canonical()
+    (A, H, Q, R) = synthetic_KNet.create_model_parameters_CA()
     ks_v = kalman.KalmanSmoother(A, H, Q, R, CA_m1_0, CA_m2_0)
     
-    print('Testing Kalman Smoother Canonical')
+    print('Testing Kalman Smoother CA case')
     val_loss = test.test_kalman_nclt(ks_v, val_loader, plots=False)
     test_loss = test.test_kalman_nclt(ks_v, test_loader, plots=False)
 
