@@ -9,7 +9,9 @@ from datasets import lorenz_KNet as lorenz
 import numpy as np
 from utils import generic_utils as g_utils
 import time
-import wandb
+from datasets.Extended_data import wandb_switch
+if wandb_switch:
+    import wandb
 
 def test_kalman(args, model, test_loader, plots=False, nclt_ds=False):
     test_loss = 0
@@ -73,11 +75,12 @@ def test_kalman_nclt(model, test_loader, plots=False,test_time=False):
     ### MSE loss in dB
     test_loss_dB = 10 * torch.log10(test_loss)
     print("MSE LOSS:", test_loss_dB, "[dB]")
-    # record to wandb
-    if(test_time):
-        wandb.summary['test loss'] = test_loss_dB
-    else:
-        wandb.log({"loss": test_loss_dB})
+    # Optional: record to wandb
+    if wandb_switch:
+        if(test_time):
+            wandb.summary['test loss'] = test_loss_dB
+        else:
+            wandb.log({"loss": test_loss_dB})
 
     ### std Standard deviation
     MSE_test_linear_std = torch.std(sample_loss, unbiased=True)
@@ -168,11 +171,12 @@ def test_gnn_kalman(args, net, device, loader, plots=False, plot_lorenz=False,te
     #   test_mse_dB = 10 * np.log10(test_mse)
     test_mse_dB = 10 * torch.log10(test_mse)
     print("MSE LOSS:", test_mse_dB, "[dB]")
-    # record to wandb
-    if(test_time):
-        wandb.summary['test loss'] = test_mse_dB
-    else:
-        wandb.log({"loss": test_mse_dB})
+    # Optiional: record to wandb
+    if wandb_switch:
+        if(test_time):
+            wandb.summary['test loss'] = test_mse_dB
+        else:
+            wandb.log({"loss": test_mse_dB})
 
     # Standard deviation
     MSE_test_linear_std = torch.std(sample_loss, unbiased=True)

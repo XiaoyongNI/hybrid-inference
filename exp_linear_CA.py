@@ -4,26 +4,31 @@ import numpy as np
 import utils.directory_utils as d_utils
 import time
 
-import wandb # Optional: record results to wandb
+from datasets.Extended_data import wandb_switch, lr_coeff
+if wandb_switch:
+    import wandb
 
 args = settings.get_settings()
 args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
 
 args.batch_size = 1
-args.gamma = 0.03
+args.gamma = 1e-13
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
 args.lr = 1e-3
-args.K = 100
+args.K = 10
 args.prior = True
 args.learned = True
 
-wandb.init(project="Hybrid_Inference_LinearCA")
-wandb.log({
-  "learning_rate": args.lr,
-  "gamma": args.gamma,
-})
+if wandb_switch:
+    wandb.init(project="Hybrid_Inference_LinearCA")
+    wandb.log({
+    "learning_rate": args.lr,
+    "gamma": args.gamma,
+    "MB_RNN_coeff": lr_coeff,
+    "K": args.K
+    })
    
 print(args)
 lr_base = float(args.lr)
@@ -130,7 +135,8 @@ if __name__ == '__main__':
 
     d_utils.write_file('logs/%s/log.txt' % (args.exp_name), str(results))
 
-# Close wandb run 
-wandb.finish()
+# Close wandb run
+if wandb_switch: 
+    wandb.finish()
 
 

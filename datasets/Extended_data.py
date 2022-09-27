@@ -14,6 +14,7 @@ else:
 #########################################
 ### Dataset path and noise statistics ###
 #########################################
+wandb_switch = True #True for wandb, False for no wandb
 InitIsRandom = True
 RotateH = False
 RotateF = False

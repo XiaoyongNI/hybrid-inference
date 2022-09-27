@@ -362,6 +362,7 @@ class GNN_Kalman(nn.Module):
             grad, h = self.gnn(h, operators, Mp_arr)
 
             if self.learned and self.prior:
+                print(sum(Mp_arr))
                 x = x + self.gamma * (grad + sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             elif self.learned and not self.prior:
