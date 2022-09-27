@@ -10,7 +10,7 @@ import test
 import losses
 from datasets.dataloader import DataLoader
 from utils import generic_utils as g_utils
-from datasets.Extended_data import m1_0, m2_0, lor_T, lor_T_test
+from datasets.Extended_data import m1_0, m2_0, CA_m1_0, CA_m2_0, lor_T, lor_T_test
 
 
 def train_hybrid(args, net, device, train_loader, optimizer, epoch):
@@ -38,6 +38,103 @@ def adjust_learning_rate(optimizer, lr, epoch):
     for param_group in optimizer.param_groups:
         param_group['lr'] = new_lr
 
+def CA_hybrid(args, val_on_train=False, load = True,test_time=False):
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    torch.manual_seed(args.seed)
+    device = torch.device("cuda" if use_cuda else "cpu")
+    args.device = device
+    print("working on device %s" % device)
+    
+    dataset_test = synthetic_KNet.SYNTHETIC(partition='test', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
+                                         equations="CA", gnn_format=True, load = load)
+    test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
+
+    dataset_train = synthetic_KNet.SYNTHETIC(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
+                                        equations="CA", gnn_format=True, load = load)
+    train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True)
+
+    dataset_val = synthetic_KNet.SYNTHETIC(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
+                                      equations="CA", gnn_format=True, load = load)
+    val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
+
+    # (A, H, Q, R) = synthetic.create_model_parameters_v(s2_x=sigma ** 2, s2_y=sigma ** 2, lambda2=lamb ** 2)
+    (A, H, Q, R) = synthetic_KNet.create_model_parameters_CA()
+    
+    if test_time:### testing
+        print("Start testing")
+        try:
+            net = torch.load(args.path_results+'best-model.pt', map_location=device)
+        except:
+            print("Error loading the trained model!!!")
+        test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False,test_time=True)
+
+        print("Test loss: %.4f" % (test_mse))
+        return test_mse.item()
+    
+    else:### training  
+        try:        
+            net = torch.load(args.path_results+'best-model.pt', map_location=device)
+            print("Load network from previous training")
+            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+            print("Number of parameters for Hybrid model: ",NumofParameter)  
+        except:
+            net = gnn.GNN_Kalman(args, A, H, Q, R, dataset_train.x0,  dataset_train.P0, nf=args.nf,
+                                prior=args.prior,  learned=args.learned, init=args.init, gamma=args.gamma).to(device)
+            print("Initialize Network")
+            torch.save(net, args.path_results + 'best-model.pt')          
+            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+            print("Number of parameters for Hybrid model: ",NumofParameter)    
+   
+        #print(net)
+        optimizer = optim.Adam(net.parameters(), lr=args.lr)
+
+        min_val = test.test_gnn_kalman(args, net, device, val_loader)
+
+        for epoch in range(1, args.epochs + 1):
+            #adjust_learning_rate(optimizer, args.lr, epoch)
+            train_hybrid(args, net, device, train_loader, optimizer, epoch)
+
+            val_mse = test.test_gnn_kalman(args, net, device, val_loader)
+            
+            if val_on_train:
+                train_mse = test.test_gnn_kalman(args, net, device, train_loader)
+                val_mse = (val_mse * dataset_val.total_len() + train_mse * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
+
+            if val_mse < min_val:
+                min_val = val_mse
+                ### save best model on validation set
+                torch.save(net, args.path_results + 'best-model.pt')
+        return min_val.item()
+
+
+def main_CA_kalman(args, val_on_train=False, optimal=False, load = True):
+
+    if val_on_train:
+        dataset_train = synthetic_KNet.SYNTHETIC(partition='train', tr_tt=args.tr_samples, val_tt=args.val_samples,
+                                            test_tt=args.test_samples,
+                                            equations="CA", gnn_format=True, load = load)
+        train_loader = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=False)
+
+    dataset_val = synthetic_KNet.SYNTHETIC(partition='val', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
+                                      equations="CA", gnn_format=True, load = load)
+    val_loader = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False)
+
+    dataset_test = synthetic_KNet.SYNTHETIC(partition='test', tr_tt=args.tr_samples, val_tt=args.val_samples, test_tt=args.test_samples,
+                                       equations="CA", gnn_format=True, load = load)
+    test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
+
+    (A, H, Q, R) = synthetic_KNet.create_model_parameters_canonical()
+    ks_v = kalman.KalmanSmoother(A, H, Q, R, CA_m1_0, CA_m2_0)
+    
+    print('Testing Kalman Smoother Canonical')
+    val_loss = test.test_kalman_nclt(ks_v, val_loader, plots=False)
+    test_loss = test.test_kalman_nclt(ks_v, test_loader, plots=False)
+
+    if val_on_train:
+        train_loss = test.test_kalman_nclt(ks_v, train_loader, plots=False)
+        val_loss = (val_loss * dataset_val.total_len() + train_loss * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
+
+    return val_loss, test_loss
 
 def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True,test_time=False):
     use_cuda = not args.no_cuda and torch.cuda.is_available()

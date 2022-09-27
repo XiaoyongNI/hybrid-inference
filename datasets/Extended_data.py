@@ -14,16 +14,18 @@ else:
 #########################################
 ### Dataset path and noise statistics ###
 #########################################
-InitIsRandom = False
-RotateH = True
+InitIsRandom = True
+RotateH = False
 RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
+CV_model = False #True for CV model, False for CA model
+
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
-compact_path_linear = 'simulations/Linear/F_rotated/2x2_Frot10_rq-1010_T20.pt'
-decimation = False # Lorenz: true for decimation case, false for DT case
+compact_path_linear = 'simulations/Linear/Linear_CA/decimated_dt1e-2_T100_r0_randnInit.pt'
+decimation = True # true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
 compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
-r2 = 10
+r2 = 1
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
 v = 10**(vdB/10)
@@ -33,7 +35,7 @@ q = np.sqrt(q2) # sigma
 if decimation:
     # opt_1overq2_dB = 8.2391
     # opt_q = np.sqrt(10**(-opt_1overq2_dB/10))
-    opt_q = 0.3873
+    opt_q = np.sqrt(0.1)
 else:
     opt_q = q #DT case
 
@@ -51,8 +53,8 @@ N_CV = 100
 N_T = 200
 
 # Sequence Length for Linear case
-T = 20
-T_test = 20
+T = 100
+T_test = 100
 # Sequence Length for NL lorenz case
 lor_T = 100
 lor_T_test = 100
@@ -110,9 +112,9 @@ H_lor_rotated = np.matmul(RotMatrix,H_design)
 
 
 
-##########################
-## Linear case F and H ###
-##########################
+####################################
+## Linear Canonical Case F and H ###
+####################################
 F10 = np.array([[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
                 [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -184,6 +186,47 @@ if RotateF:
 
 # m1_0 = np.zeros((m), dtype=np.float32)
 # m2_0 = 0 * 0 * np.eye(m)
+
+#####################
+## Linear CA Case ###
+#####################
+CA_m = 3 # dim of state
+CA_n = 3 # dim of observation
+std = 1
+CA_m1_0 = np.zeros((CA_m), dtype=np.float32) # Initial State
+CA_m2_0 = std * std * np.eye(CA_m) # Initial Covariance
+
+delta_t_gen =  1e-2
+
+### state evolution matrix F and observation matrix H
+F_gen = np.array([[1, delta_t_gen,0.5*delta_t_gen**2],
+                  [0,       1,       delta_t_gen],
+                  [0,       0,         1]], dtype=np.float32)
+
+F_CV = np.array([[1, delta_t_gen,0],
+                     [0,       1,    0],
+                     [0,       0,    0]], dtype=np.float32)                
+
+# Observe only the postion
+H_onlyPos = np.array([[1, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0]], dtype=np.float32)
+
+### process noise Q and observation noise R 
+# Noise Parameters
+CA_r2 = 1
+CA_q2 = 1
+
+Q_gen = CA_q2 * np.array([[1/20*delta_t_gen**5, 1/8*delta_t_gen**4,1/6*delta_t_gen**3],
+                           [ 1/8*delta_t_gen**4, 1/3*delta_t_gen**3,1/2*delta_t_gen**2],
+                           [ 1/6*delta_t_gen**3, 1/2*delta_t_gen**2,       delta_t_gen]], dtype=np.float32)
+
+Q_CV = CA_q2 * np.array([[1/3*delta_t_gen**3, 1/2*delta_t_gen**2,0],
+                          [1/2*delta_t_gen**2, delta_t_gen,       0],
+                           [ 0,                  0,               0]], dtype=np.float32) 
+
+R_onlyPos = CA_r2 * H_onlyPos 
+
 
 
 

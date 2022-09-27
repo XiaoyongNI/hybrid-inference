@@ -7,7 +7,8 @@ import torch
 import math
 import matplotlib.pyplot as plt
 from random import randint
-from datasets.Extended_data import F, H, T, m, n, m1_0, m2_0, compact_path_linear,InitIsRandom
+from datasets.Extended_data import F, H, T, R_onlyPos, m, n, m1_0, m2_0, compact_path_linear,InitIsRandom,\
+CV_model, CA_m1_0, CA_m2_0, F_gen,F_CV, Q_gen,Q_CV, H_onlyPos, R_onlyPos
 
 
 class SYNTHETIC(data.Dataset):
@@ -34,6 +35,9 @@ class SYNTHETIC(data.Dataset):
         elif self.equations == "canonical":           
             self.x0 = m1_0
             self.P0 = m2_0
+        elif self.equations == "CA":           
+            self.x0 = CA_m1_0
+            self.P0 = CA_m2_0
         seeds = {'test': 0, 'train': 50, 'val': 51}
 
 
@@ -165,6 +169,8 @@ class SYNTHETIC(data.Dataset):
         #     sample = simulate_system(create_model_parameters_ar, K=tt, x0=self.x0, start_after=start_after)
         elif self.equations == "canonical":
             sample = simulate_system(create_model_parameters_canonical, K=tt, x0=self.x0, start_after=start_after)
+        elif self.equations == "CA":
+            sample = simulate_system(create_model_parameters_CA, K=tt, x0=self.x0, start_after=start_after)
         return list(sample)
 
     def __build_operators(self, nn=20):
@@ -239,6 +245,21 @@ def create_model_parameters_canonical(q=1, r=1):
     # Measurement model parameters
 
     R = r * r * np.eye(n)
+
+    return A, H, Q, R
+
+def create_model_parameters_CA():
+    # Motion model parameters
+    if CV_model:
+        A = F_CV
+        Q = Q_CV
+    else:
+        A = F_gen
+        Q = Q_gen
+
+    # Measurement model parameters
+    H = H_onlyPos
+    R = R_onlyPos
 
     return A, H, Q, R
 
