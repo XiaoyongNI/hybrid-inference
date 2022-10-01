@@ -71,7 +71,7 @@ class G_E_GNN(nn.Module):
 
         self.edge_mlp_l = MLP(nf*2 + dim_state_edge, nf, nf)
         self.edge_mlp_r = MLP(nf * 2 + dim_state_edge, nf, nf)
-        self.edge_mlp_u = MLP(nf * 2 + dim_state_edge, nf, nf)
+        self.edge_mlp_u = MLP(nf * 2 + dim_meas_edge, nf, nf)
 
 
         self.node_mlp = nn.Sequential(
@@ -178,21 +178,14 @@ class GNN_Kalman(nn.Module):
         self.args = args
         self.A = self.np2torch(A)
         self.H = self.np2torch(H)
-        self.Q = self.np2torch(Q)
-        try:
-            self.Q_inv = self.np2torch(np.linalg.inv(Q))
-        except:# if CV model, Q is singular
-            inverse = np.zeros_like(Q)
-            inverse[0:2,0:2] = np.linalg.inv(Q[0:2,0:2]) # CV: only invert the first 2x2 block
-            self.Q_inv = self.np2torch(inverse)
+        self.Q = self.np2torch(Q)       
+        self.Q_inv = self.np2torch(np.linalg.inv(Q))
 
         self.R = self.np2torch(R)
-        try:
-            self.R_inv = self.np2torch(np.linalg.inv(R))
-        except:# if only observe position, H is singular
-            inverse = R
-            inverse[0,0] = 1/R[0,0]
-            self.R_inv = self.np2torch(inverse)
+        if self.H.shape[0] == 1: # if only observe position
+          self.R_inv = self.np2torch(np.array(1/R))
+        else:        
+          self.R_inv = self.np2torch(np.linalg.inv(R))
 
         self.init = init
 
@@ -298,10 +291,15 @@ class GNN_Kalman(nn.Module):
 
     def m2(self, x, meas):
         "Message from y_t to x_t"
-        coef1 = torch.bmm(self.H_b.transpose(1, 2), self.R_inv_b)
-        coef2 = (meas - torch.bmm(self.H_b, x))
-        m2 = torch.bmm(coef1, coef2)
-        # (self.H.transpose() @ self.R_inv) @ (meas - self.H @ x)
+        if self.dim_meas == 1:
+            coef1 = self.R_inv_b
+            coef2 = (meas - torch.bmm(self.H_b, x))
+            m2 = coef1 * coef2
+        else:                 
+            coef1 = torch.bmm(self.H_b.transpose(1, 2), self.R_inv_b)
+            coef2 = (meas - torch.bmm(self.H_b, x))
+            m2 = torch.bmm(coef1, coef2)
+            # (self.H.transpose() @ self.R_inv) @ (meas - self.H @ x)
         return m2
 
     def m3(self, x):
@@ -334,7 +332,11 @@ class GNN_Kalman(nn.Module):
             return [m1, m2, m3]
 
     def init_states(self, meas):
-        in_state = torch.bmm(self.H_b.transpose(1, 2), meas)
+        if self.dim_meas == 1:# if only observe position
+            inverse = torch.linalg.pinv(self.H_b)  
+            in_state = torch.bmm(inverse, meas)
+        else:
+            in_state = torch.bmm(self.H_b.transpose(1, 2), meas)        
         return torch.tensor(in_state.data)
 
     def state2pos(self, state):

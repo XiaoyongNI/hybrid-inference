@@ -14,7 +14,7 @@ else:
 #########################################
 ### Dataset path and noise statistics ###
 #########################################
-wandb_switch = True #True for wandb, False for no wandb
+wandb_switch = False #True for wandb, False for no wandb
 InitIsRandom = True
 RotateH = False
 RotateF = False
@@ -216,9 +216,9 @@ H_onlyPos = np.array([[1, 0, 0]], dtype=np.float32)
 
 ### process noise Q and observation noise R 
 # Noise Parameters
-CA_r2 = 1
-CA_q2 = 1
-CV_q2 = 0.1 # can be tuned
+CA_r2 = np.array(1.0, dtype=np.float32) 
+CA_q2 = np.array(1.0, dtype=np.float32)    
+CV_q2 = np.array(0.1, dtype=np.float32)   # can be tuned
 
 Q_gen = CA_q2 * np.array([[1/20*delta_t_gen**5, 1/8*delta_t_gen**4,1/6*delta_t_gen**3],
                            [ 1/8*delta_t_gen**4, 1/3*delta_t_gen**3,1/2*delta_t_gen**2],
