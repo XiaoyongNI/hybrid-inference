@@ -208,7 +208,7 @@ class GNN_Kalman(nn.Module):
         #GNN parameters
         self.nf = nf
         self.J = 3
-        self.dim_meas = self.H.shape[1]
+        self.dim_meas = self.H.shape[0]
         self.dim_state = self.A.shape[1]
         #self.dim_input = self.dim_state + self.dim_meas
         self.alpha = torch.nn.Parameter(torch.ones(1))
@@ -362,7 +362,6 @@ class GNN_Kalman(nn.Module):
             grad, h = self.gnn(h, operators, Mp_arr)
 
             if self.learned and self.prior:
-                print(sum(Mp_arr))
                 x = x + self.gamma * (grad + sum(Mp_arr))
                 pos_track.append(self.state2pos(x).transpose(1, 2))
             elif self.learned and not self.prior:

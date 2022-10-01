@@ -8,7 +8,8 @@ import math
 import matplotlib.pyplot as plt
 from random import randint
 from datasets.Extended_data import F, H, T, R_onlyPos, m, n, m1_0, m2_0, compact_path_linear,InitIsRandom,\
-CV_model, CA_m1_0, CA_m2_0, F_gen,F_CV, Q_gen,Q_CV, H_onlyPos, R_onlyPos
+CV_model, CA_m1_0, CA_m2_0, F_gen, Q_gen, H_onlyPos, R_onlyPos,\
+CV_m1_0, CV_m2_0,F_CV,Q_CV
 
 
 class SYNTHETIC(data.Dataset):
@@ -35,9 +36,13 @@ class SYNTHETIC(data.Dataset):
         elif self.equations == "canonical":           
             self.x0 = m1_0
             self.P0 = m2_0
-        elif self.equations == "CA":           
-            self.x0 = CA_m1_0
-            self.P0 = CA_m2_0
+        elif self.equations == "CA":  
+            if CV_model:
+                self.x0 = CV_m1_0
+                self.P0 = CV_m2_0
+            else:         
+                self.x0 = CA_m1_0
+                self.P0 = CA_m2_0
         seeds = {'test': 0, 'train': 50, 'val': 51}
 
 

@@ -13,7 +13,7 @@ args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
 
 args.batch_size = 1
-args.gamma = 1e-13
+args.gamma = 1e-7
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
 args.lr = 1e-3
