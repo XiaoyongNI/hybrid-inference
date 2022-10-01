@@ -14,12 +14,12 @@ else:
 #########################################
 ### Dataset path and noise statistics ###
 #########################################
-wandb_switch = False #True for wandb, False for no wandb
+wandb_switch = True #True for wandb, False for no wandb
 InitIsRandom = True
 RotateH = False
 RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
-CV_model = False #True for CV model, False for CA model
+CV_model = True #True for CV model, False for CA model
 
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/Linear_CA/New_decimated_dt1e-2_T100_r0_randnInit.pt'
