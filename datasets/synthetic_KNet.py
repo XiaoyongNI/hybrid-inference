@@ -7,9 +7,9 @@ import torch
 import math
 import matplotlib.pyplot as plt
 from random import randint
-from datasets.Extended_data import F, H, T, R_onlyPos, m, n, m1_0, m2_0, compact_path_linear,InitIsRandom,\
+from datasets.Extended_data import F, H, T, m, n, m1_0, m2_0, compact_path_linear,InitIsRandom,\
 CV_model, CA_m1_0, CA_m2_0, F_gen, Q_gen, H_onlyPos, R_onlyPos,\
-CV_m1_0, CV_m2_0,F_CV,Q_CV
+CV_m1_0, CV_m2_0,F_CV,Q_CV,CV_m
 
 
 class SYNTHETIC(data.Dataset):
@@ -50,9 +50,48 @@ class SYNTHETIC(data.Dataset):
             print("load pre-generated data!")
             if InitIsRandom:
                 [train_input, train_target, train_init, cv_input, cv_target, cv_init, test_input, test_target, test_init] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
+                if self.equations == "CA":
+                    if CV_model:# set state as (p,v) instead of (p,v,a)
+                        train_target = train_target[:,0:CV_m,:]
+                        train_init = train_init[:,0:CV_m]
+                        cv_target = cv_target[:,0:CV_m,:]
+                        cv_init = cv_init[:,0:CV_m]
+                        test_target = test_target[:,0:CV_m,:]
+                        test_init = test_init[:,0:CV_m]
+                        ### duplicate state [p,v] to [p,v,p,v]
+                        train_input = torch.cat((train_input, train_input), 1)
+                        train_target = torch.cat((train_target, train_target), 1)
+                        train_init = torch.cat((train_init, train_init), 1)
+
+                        cv_input = torch.cat((cv_input, cv_input), 1)
+                        cv_target = torch.cat((cv_target, cv_target), 1)
+                        cv_init = torch.cat((cv_init, cv_init), 1)
+
+                        test_input = torch.cat((test_input, test_input), 1)
+                        test_target = torch.cat((test_target, test_target), 1)
+                        test_init = torch.cat((test_init, test_init), 1)
+                    else:
+                        ### duplicate state [p,v,a] to [p,v,a,p,v,a]
+                        train_input = torch.cat((train_input, train_input), 1)
+                        train_target = torch.cat((train_target, train_target), 1)
+                        train_init = torch.cat((train_init, train_init), 1)
+
+                        cv_input = torch.cat((cv_input, cv_input), 1)
+                        cv_target = torch.cat((cv_target, cv_target), 1)
+                        cv_init = torch.cat((cv_init, cv_init), 1)
+
+                        test_input = torch.cat((test_input, test_input), 1)
+                        test_target = torch.cat((test_target, test_target), 1)
+                        test_init = torch.cat((test_init, test_init), 1)
+
+                    
             else:
                 [train_input, train_target, cv_input, cv_target, test_input, test_target] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
-        
+                if CV_model:# set state as (p,v) instead of (p,v,a)
+                    train_target = train_target[:,0:CV_m,:]
+                    cv_target = cv_target[:,0:CV_m,:]
+                    test_target = test_target[:,0:CV_m,:]
+
             ### self.data = list[state, meas]
             if self.partition == 'train':
                 ### Convert to np array and float64 type

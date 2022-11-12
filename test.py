@@ -9,7 +9,7 @@ from datasets import lorenz_KNet as lorenz
 import numpy as np
 from utils import generic_utils as g_utils
 import time
-from datasets.Extended_data import wandb_switch
+from datasets.Extended_data import wandb_switch,Test_Loss_OnlyP
 if wandb_switch:
     import wandb
 
@@ -62,7 +62,10 @@ def test_kalman_nclt(model, test_loader, plots=False,test_time=False):
 
             if plots:
                 synthetic.plot_trajecotry([state_np, g_utils.state2position(est_state)])
-            sample_loss[j] = torch.from_numpy(np.asarray(eval.mse(state_np, g_utils.state2position(est_state), normalize=False)))
+            if Test_Loss_OnlyP:
+                sample_loss[j] = torch.from_numpy(np.asarray(np.sum((np.square((state_np[:,0])-(est_state[:,0]))))))
+            else:
+                sample_loss[j] = torch.from_numpy(np.asarray(eval.mse(state_np, g_utils.state2position(est_state), normalize=False)))
             test_loss += sample_loss[j]
             sample_loss[j] /= state.size()[1]##average over traj length T  
             j += 1
@@ -148,11 +151,18 @@ def test_gnn_kalman(args, net, device, loader, plots=False, plot_lorenz=False,te
             position, meas, x0 = position.to(device), meas.to(device), x0.to(device)
             operators = g_utils.operators2device(operators, device)
             outputs = net([operators, meas], x0, args.K, ts=ts)
-            sample_loss[j] = F.mse_loss(outputs[-1], position) * meas.size()[0] * meas.size()[1]
-            test_mse = test_mse + sample_loss[j]
-            sample_loss[j] /= T ##average over traj length T
-            j += 1
-            test_loss += losses.mse_arr_loss(outputs, position) * meas.size()[0] * meas.size()[1]
+            if Test_Loss_OnlyP:
+                sample_loss[j] = F.mse_loss(outputs[-1][:,:,0], position[:,:,0]) * meas.size()[0] * meas.size()[1]
+                test_mse = test_mse + sample_loss[j]
+                sample_loss[j] /= T ##average over traj length T
+                j += 1
+                test_loss += losses.mse_arr_loss(outputs, position,Test_Loss_OnlyP=True) * meas.size()[0] * meas.size()[1]
+            else:
+                sample_loss[j] = F.mse_loss(outputs[-1], position) * meas.size()[0] * meas.size()[1]
+                test_mse = test_mse + sample_loss[j]
+                sample_loss[j] /= T ##average over traj length T
+                j += 1
+                test_loss += losses.mse_arr_loss(outputs, position) * meas.size()[0] * meas.size()[1]
         test_mse /= loader.dataset.total_len() + 1e-10
         test_loss /= loader.dataset.total_len() + 1e-10
     

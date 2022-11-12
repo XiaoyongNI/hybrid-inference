@@ -13,12 +13,12 @@ args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
 
 args.batch_size = 1
-args.gamma = 1e-16
+args.gamma = 3e-2
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
 args.lr = 1e-3
 args.K = 100
-args.prior = True
+args.prior = False
 args.learned = True
 
 if wandb_switch:
@@ -70,7 +70,7 @@ def baseline():
 #     return best_sigma, test_error
 
 def kalman_optimal():
-    _, test = main_KNet.main_CA_kalman(args, val_on_train=False, optimal=True)
+    test = main_KNet.main_CA_kalman(args, val_on_train=False, optimal=True)
     return test
 
 
@@ -95,10 +95,10 @@ if __name__ == '__main__':
 
     #results = {'prior': [], 'learned': [], 'hybrid': [], 'sigma': [], 'lamb':[], 'sigma_kalman': [], 'n_samples': [], 'kalman':[], 'kalman_optimal':[]}
      ## Kalman Smoother Optimal ##
-    print("\n######## \nKalman Optimal: start\n########\n")
-    test_error = kalman_optimal()
-    results['kalman_optimal'].append(test_error)
-    print("\n######## \nKalman Optimal: end\n########\n")
+    # print("\n######## \nKalman Optimal: start\n########\n")
+    # test_error = kalman_optimal()
+    # results['kalman_optimal'].append(test_error)
+    # print("\n######## \nKalman Optimal: end\n########\n")
 
     for n_samples, epochs, lr in zip(sweep_samples, epochs_arr, lr_arr):
         args.lr = lr

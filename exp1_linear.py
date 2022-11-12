@@ -141,31 +141,31 @@ if __name__ == '__main__':
         print("### Linear experiment n_samples: %d \t epochs: %d" % (n_samples, epochs))
 
         ## Kalman Smoother Optimal ##
-        print("\n######## \nKalman Optimal: start\n########\n")
-        test_error = kalman_optimal()
-        results['kalman_optimal'].append(test_error)
-        print("\n######## \nKalman Optimal: end\n########\n")
+        # print("\n######## \nKalman Optimal: start\n########\n")
+        # test_error = kalman_optimal()
+        # results['kalman_optimal'].append(test_error)
+        # print("\n######## \nKalman Optimal: end\n########\n")
 
-        ## Kalman Smoother ##
-        print("\n######## \nKalman Smoother: start\n########\n")
-        sigma, test_error = kalman(n_samples)
-        results['kalman'].append(test_error)
-        results['sigma_kalman'].append(sigma)
-        print("\n######## \nKalman Smoother: end\n########\n")
+        # ## Kalman Smoother ##
+        # print("\n######## \nKalman Smoother: start\n########\n")
+        # sigma, test_error = kalman(n_samples)
+        # results['kalman'].append(test_error)
+        # results['sigma_kalman'].append(sigma)
+        # print("\n######## \nKalman Smoother: end\n########\n")
 
 
         ## Only Prior ##
-        print("\n######## \nOnly Prior: start\n########\n")
-        best_sigma, test_error = only_prior(n_samples)
-        results['prior'].append(test_error)
-        results['sigma'].append(best_sigma)
-        print("\n######## \nOnly Prior: end\n########\n")
-        print(best_sigma)
+        # print("\n######## \nOnly Prior: start\n########\n")
+        # best_sigma, test_error = only_prior(n_samples)
+        # results['prior'].append(test_error)
+        # results['sigma'].append(best_sigma)
+        # print("\n######## \nOnly Prior: end\n########\n")
+        # print(best_sigma)
 
-        ## Only Learned ##
-        print("\n######## \nOnly Learned: start\n########\n")
-        results['learned'].append(only_learned(n_samples, epochs))
-        print("\n######## \nOnly Learned: end\n########\n")
+        # ## Only Learned ##
+        # print("\n######## \nOnly Learned: start\n########\n")
+        # results['learned'].append(only_learned(n_samples, epochs))
+        # print("\n######## \nOnly Learned: end\n########\n")
 
 
         ## Hybrid ##

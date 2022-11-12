@@ -5,7 +5,7 @@ import numpy as np
 from torch.nn.modules.module import Module
 from torch import autograd
 import math
-from datasets.Extended_data import lr_coeff, HNL, h_nonlinear, m1_x0, m2_x0, RotateH, H_lor_rotated
+from datasets.Extended_data import lr_coeff, HNL, h_nonlinear, m1_x0, m2_x0, RotateH, H_lor_rotated  
 
 
 
@@ -71,7 +71,7 @@ class G_E_GNN(nn.Module):
 
         self.edge_mlp_l = MLP(nf*2 + dim_state_edge, nf, nf)
         self.edge_mlp_r = MLP(nf * 2 + dim_state_edge, nf, nf)
-        self.edge_mlp_u = MLP(nf * 2 + dim_meas_edge, nf, nf)
+        self.edge_mlp_u = MLP(nf * 2 + dim_state_edge, nf, nf)
 
 
         self.node_mlp = nn.Sequential(
@@ -201,8 +201,8 @@ class GNN_Kalman(nn.Module):
         #GNN parameters
         self.nf = nf
         self.J = 3
-        self.dim_meas = self.H.shape[0]
-        self.dim_state = self.A.shape[1]
+        self.dim_meas = self.H.shape[1]
+        self.dim_state = self.A.shape[2]
         #self.dim_input = self.dim_state + self.dim_meas
         self.alpha = torch.nn.Parameter(torch.ones(1))
 
@@ -333,8 +333,7 @@ class GNN_Kalman(nn.Module):
 
     def init_states(self, meas):
         if self.dim_meas == 1:# if only observe position
-            inverse = torch.linalg.pinv(self.H_b)  
-            in_state = torch.bmm(inverse, meas)
+            in_state = torch.zeros(1,self.dim_state,meas.size()[2])
         else:
             in_state = torch.bmm(self.H_b.transpose(1, 2), meas)        
         return torch.tensor(in_state.data)

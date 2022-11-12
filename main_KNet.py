@@ -10,7 +10,7 @@ import test
 import losses
 from datasets.dataloader import DataLoader
 from utils import generic_utils as g_utils
-from datasets.Extended_data import m1_0, m2_0, CA_m1_0, CA_m2_0, lor_T, lor_T_test
+from datasets.Extended_data import m1_0, m2_0, CA_m1_0, CA_m2_0, CV_m1_0, CV_m2_0,lor_T, lor_T_test,CV_model,Train_Loss_OnlyP
 
 
 def train_hybrid(args, net, device, train_loader, optimizer, epoch):
@@ -21,8 +21,12 @@ def train_hybrid(args, net, device, train_loader, optimizer, epoch):
         operators = g_utils.operators2device(operators, device)
         optimizer.zero_grad()
         outputs = net([operators, meas], x0, args.K, ts=ts)
-        mse = F.mse_loss(outputs[-1], position)
-        loss = losses.mse_arr_loss(outputs, position)
+        if Train_Loss_OnlyP: 
+            mse = F.mse_loss(outputs[-1][:,:,0], position[:,:,0])
+            loss = losses.mse_arr_loss(outputs, position,Test_Loss_OnlyP=True)
+        else:
+            mse = F.mse_loss(outputs[-1], position)
+            loss = losses.mse_arr_loss(outputs, position)
         if meas.size(0) == 1:
             loss = loss * meas.size(1) / stepsxsample
         loss.backward()
@@ -124,17 +128,21 @@ def main_CA_kalman(args, val_on_train=False, optimal=False, load = True):
     test_loader = DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
 
     (A, H, Q, R) = synthetic_KNet.create_model_parameters_CA()
-    ks_v = kalman.KalmanSmoother(A, H, Q, R, CA_m1_0, CA_m2_0)
-    
-    print('Testing Kalman Smoother CA case')
-    val_loss = test.test_kalman_nclt(ks_v, val_loader, plots=False)
+    if CV_model:
+        ks_v = kalman.KalmanSmoother(A, H, Q, R, CV_m1_0, CV_m2_0)
+        print('Testing Kalman Smoother CV case')
+    else:
+        ks_v = kalman.KalmanSmoother(A, H, Q, R, CA_m1_0, CA_m2_0)   
+        print('Testing Kalman Smoother CA case')
+
+    # val_loss = test.test_kalman_nclt(ks_v, val_loader, plots=False)
     test_loss = test.test_kalman_nclt(ks_v, test_loader, plots=False)
 
     if val_on_train:
         train_loss = test.test_kalman_nclt(ks_v, train_loader, plots=False)
         val_loss = (val_loss * dataset_val.total_len() + train_loss * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
 
-    return val_loss, test_loss
+    return test_loss
 
 def synthetic_hybrid(args, sigma=1, lamb=1, val_on_train=False, load = True,test_time=False):
     use_cuda = not args.no_cuda and torch.cuda.is_available()

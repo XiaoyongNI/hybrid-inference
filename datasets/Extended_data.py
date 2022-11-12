@@ -14,18 +14,22 @@ else:
 #########################################
 ### Dataset path and noise statistics ###
 #########################################
-wandb_switch = True #True for wandb, False for no wandb
+wandb_switch = False #True for wandb, False for no wandb
 InitIsRandom = True
 RotateH = False
 RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
-CV_model = True #True for CV model, False for CA model
+CV_model = False #True for CV model, False for CA model
+Train_Loss_OnlyP = True # if True: train loss = MSE(p,p^), else: train loss = MSE(pva,pva^)
+Test_Loss_OnlyP = True # if True: test loss = MSE(p,p^), else: test loss = MSE(pva,pva^)
 
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/Linear_CA/New_decimated_dt1e-2_T100_r0_randnInit.pt'
 decimation = True # true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
 compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
+
+# Noise statistics for all cases expect linear CA(linear CA is defined in later part of this file seperately)
 r2 = 1
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
@@ -191,10 +195,10 @@ if RotateF:
 #############################
 ## Linear CA(and CV) Case ###
 #############################
-CA_m = 3 # dim of state
-CV_m = 2 # dim of state for CV model
-CA_n = 1 # dim of observation
-std = 1
+CA_m = 6 # dim of state
+CV_m = 4 # dim of state for CV model
+CA_n = 2 # dim of observation
+std = 0 # known init
 CA_m1_0 = np.zeros((CA_m), dtype=np.float32) # Initial State
 CV_m1_0 = np.zeros((CV_m), dtype=np.float32) # Initial State for CV
 CA_m2_0 = std * std * np.eye(CA_m) # Initial Covariance
@@ -203,16 +207,29 @@ CV_m2_0 = std * std * np.eye(CV_m) # Initial Covariance for CV
 delta_t_gen =  1e-2
 
 ### state evolution matrix F and observation matrix H
-F_gen = np.array([[1, delta_t_gen,0.5*delta_t_gen**2],
+zeros_3 = np.zeros((3, 3))
+zeros_2 = np.zeros((2, 2))
+F_base = np.array([[1, delta_t_gen,0.5*delta_t_gen**2],
                   [0,       1,       delta_t_gen],
                   [0,       0,         1]], dtype=np.float32)
 
-F_CV = np.array([[1, delta_t_gen],
-                     [0,           1]], dtype=np.float32)       
+F_gen = np.block([[F_base, zeros_3],
+                  [zeros_3, F_base]])
+
+F_CV_base = np.array([[1, delta_t_gen],
+                     [0,           1]], dtype=np.float32)    
+
+F_CV = np.block([[F_CV_base, zeros_2],
+                  [zeros_2, F_CV_base]])   
 
 
 # Observe only the postion
-H_onlyPos = np.array([[1, 0, 0]], dtype=np.float32)
+if CV_model:
+    H_onlyPos = np.array([[1, 0, 0, 0],
+                          [0, 0, 1, 0]], dtype=np.float32)
+else:
+    H_onlyPos = np.array([[1, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 1, 0, 0]], dtype=np.float32)
 
 ### process noise Q and observation noise R 
 # Noise Parameters
@@ -220,14 +237,24 @@ CA_r2 = np.array(1.0, dtype=np.float32)
 CA_q2 = np.array(1.0, dtype=np.float32)    
 CV_q2 = np.array(0.1, dtype=np.float32)   # can be tuned
 
-Q_gen = CA_q2 * np.array([[1/20*delta_t_gen**5, 1/8*delta_t_gen**4,1/6*delta_t_gen**3],
+Q_gen_base = CA_q2 * np.array([[1/20*delta_t_gen**5, 1/8*delta_t_gen**4,1/6*delta_t_gen**3],
                            [ 1/8*delta_t_gen**4, 1/3*delta_t_gen**3,1/2*delta_t_gen**2],
                            [ 1/6*delta_t_gen**3, 1/2*delta_t_gen**2,       delta_t_gen]], dtype=np.float32)
+### Diagonal Q
+# Q_gen_base = CA_q2 * np.array([[delta_t_gen/3, 0,0],
+#                            [0, delta_t_gen,0],
+#                            [ 0,0,       3*delta_t_gen]], dtype=np.float32)
 
-Q_CV = CA_q2 * np.array([[1/3*delta_t_gen**3, 1/2*delta_t_gen**2],
+Q_gen = np.block([[Q_gen_base, zeros_3],
+                  [zeros_3, Q_gen_base]])
+
+Q_CV_base = CA_q2 * np.array([[1/3*delta_t_gen**3, 1/2*delta_t_gen**2],
                           [1/2*delta_t_gen**2, delta_t_gen]], dtype=np.float32) 
 
-R_onlyPos = CA_r2 
+Q_CV = np.block([[Q_CV_base, zeros_2],
+                    [zeros_2, Q_CV_base]])
+
+R_onlyPos = CA_r2 * np.eye(CA_n)
 
 
 
