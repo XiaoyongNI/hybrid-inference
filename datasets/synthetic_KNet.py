@@ -167,12 +167,12 @@ class SYNTHETIC(data.Dataset):
         #x0, P0 = self.__pos2x0(pos[0, :])
         if self.gnn_format:
             if self.equations == "canonical":
-                pos = state 
+                pos = state.astype(np.float32) 
             elif self.equations == "CA": 
                 if CV_model:
-                    pos = state[:, [0, 1]]
+                    pos = state[:, [0, 1]].astype(np.float32)
                 else:
-                    pos = state[:, [0, 1, 2]]
+                    pos = state[:, [0, 1, 2]].astype(np.float32)
             else:
                 pos = generic_utils.state2position(state).astype(np.float32)
             return np.arange(0, meas.shape[0], 1), pos, meas.astype(np.float32), x0, self.P0, operator
