@@ -58,8 +58,10 @@ def dim2indexpos(num_dimensions):
 def state2position(state):
     if len(state[0]) == 4:
         position = state[:, [0, 2]]
+        # position = state[:, [0, 1]]
     elif len(state[0]) == 6:
         position = state[:, [0, 3]]
+        # position = state[:, [0, 1, 2]]
     else:
         position = state
     return position

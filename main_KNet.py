@@ -21,6 +21,14 @@ def train_hybrid(args, net, device, train_loader, optimizer, epoch):
         operators = g_utils.operators2device(operators, device)
         optimizer.zero_grad()
         outputs = net([operators, meas], x0, args.K, ts=ts)
+        ### eliminate double dim
+        if train_loader.dataset.equations == 'CA':
+            for i in range(len(outputs)):
+                if CV_model:
+                    outputs[i] = outputs[i][:,:,0:2]
+                else:
+                    outputs[i] = outputs[i][:,:,0:3]
+
         if Train_Loss_OnlyP: 
             mse = F.mse_loss(outputs[-1][:,:,0], position[:,:,0])
             loss = losses.mse_arr_loss(outputs, position,Test_Loss_OnlyP=True)

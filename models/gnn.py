@@ -182,11 +182,10 @@ class GNN_Kalman(nn.Module):
         self.Q_inv = self.np2torch(np.linalg.inv(Q))
 
         self.R = self.np2torch(R)
-        if self.H.shape[0] == 1: # if only observe position
-          self.R_inv = self.np2torch(np.array(1/R))
-        else:        
-          self.R_inv = self.np2torch(np.linalg.inv(R))
-
+        if self.H.shape[1] == 1: # if only observe position
+            self.R_inv = self.np2torch(np.array(1/R))
+        else:    
+            self.R_inv = self.np2torch(np.linalg.inv(R))
         self.init = init
 
         # Initial state
@@ -295,7 +294,7 @@ class GNN_Kalman(nn.Module):
             coef1 = self.R_inv_b
             coef2 = (meas - torch.bmm(self.H_b, x))
             m2 = coef1 * coef2
-        else:                 
+        else:            
             coef1 = torch.bmm(self.H_b.transpose(1, 2), self.R_inv_b)
             coef2 = (meas - torch.bmm(self.H_b, x))
             m2 = torch.bmm(coef1, coef2)

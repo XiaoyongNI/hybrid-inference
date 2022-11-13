@@ -20,11 +20,11 @@ RotateH = False
 RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
 CV_model = False #True for CV model, False for CA model
-Train_Loss_OnlyP = True # if True: train loss = MSE(p,p^), else: train loss = MSE(pva,pva^)
-Test_Loss_OnlyP = True # if True: test loss = MSE(p,p^), else: test loss = MSE(pva,pva^)
+Train_Loss_OnlyP = False # if True: train loss = MSE(p,p^), else: train loss = MSE(pva,pva^)
+Test_Loss_OnlyP = False # if True: test loss = MSE(p,p^), else: test loss = MSE(pva,pva^)
 
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
-compact_path_linear = 'simulations/Linear/Linear_CA/New_decimated_dt1e-2_T100_r0_randnInit.pt'
+compact_path_linear = 'simulations/Linear/Linear_CA/decimated_dt1_T100_r0_randnInit.pt'
 decimation = True # true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
 compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
@@ -204,7 +204,7 @@ CV_m1_0 = np.zeros((CV_m), dtype=np.float32) # Initial State for CV
 CA_m2_0 = std * std * np.eye(CA_m) # Initial Covariance
 CV_m2_0 = std * std * np.eye(CV_m) # Initial Covariance for CV
 
-delta_t_gen =  1e-2
+delta_t_gen =  1
 
 ### state evolution matrix F and observation matrix H
 zeros_3 = np.zeros((3, 3))

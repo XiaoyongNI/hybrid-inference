@@ -13,12 +13,12 @@ args.exp_name = str(time.time())+'_linear'
 d_utils.init_folders(args.exp_name)
 
 args.batch_size = 1
-args.gamma = 3e-2
+args.gamma = 1e-20
 args.test_samples = 10*1000
 args.init = 'meas_invariant'
 args.lr = 1e-3
 args.K = 100
-args.prior = False
+args.prior = True
 args.learned = True
 
 if wandb_switch:
