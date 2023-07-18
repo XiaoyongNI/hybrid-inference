@@ -25,7 +25,7 @@ Test_Loss_OnlyP = False # if True: test loss = MSE(p,p^), else: test loss = MSE(
 
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/Linear_CA/New_decimated_dt1e-2_T100_r0_randnInit.pt'
-decimation = True # true for decimation case, false for DT case
+decimation = False # true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
 compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
 
@@ -250,6 +250,9 @@ Q_gen = np.block([[Q_gen_base, zeros_3],
 
 Q_CV_base = CA_q2 * np.array([[1/3*delta_t_gen**3, 1/2*delta_t_gen**2],
                           [1/2*delta_t_gen**2, delta_t_gen]], dtype=np.float32) 
+### Diagonal Q
+# Q_CV_base = CA_q2 * np.array([[delta_t_gen, 0],
+#                          [0, delta_t_gen]], dtype=np.float32) 
 
 Q_CV = np.block([[Q_CV_base, zeros_2],
                     [zeros_2, Q_CV_base]])

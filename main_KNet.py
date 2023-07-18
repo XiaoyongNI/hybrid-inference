@@ -288,17 +288,17 @@ def main_lorenz_hybrid(args, sigma=2, lamb=0.5, val_on_train=False, dt=0.02, K=1
         return test_mse.item()
     
     else:### training      
-        try:        
-            net = torch.load(args.path_results+'best-model.pt', map_location=device)
-            print("Load network from previous training")
-            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
-            print("Number of parameters for Hybrid model: ",NumofParameter)  
-        except:
-            net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
-            print("Initialize Network")
-            torch.save(net, args.path_results + 'best-model.pt')          
-            NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
-            print("Number of parameters for Hybrid model: ",NumofParameter)
+        # try:        
+        #     net = torch.load(args.path_results+'best-model.pt', map_location=device)
+        #     print("Load network from previous training")
+        #     NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+        #     print("Number of parameters for Hybrid model: ",NumofParameter)  
+        # except:
+        net = gnn.Hybrid_lorenz(args, sigma=sigma, lamb=lamb, nf=args.nf, dt=dt, K=K, prior=args.prior, learned=args.learned, init=args.init, gamma=args.gamma).to(device)
+        print("Initialize Network")
+        torch.save(net, args.path_results + 'best-model.pt')          
+        NumofParameter = sum(p.numel() for p in net.parameters() if p.requires_grad)
+        print("Number of parameters for Hybrid model: ",NumofParameter)
         
         optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
