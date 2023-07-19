@@ -5,7 +5,9 @@ import time
 import utils.directory_utils as d_utils
 from datasets.Extended_data import opt_q, r, decimation
 
-import wandb
+# from datasets.Extended_data import wandb_switch
+# if wandb_switch:
+#     import wandb
 
 print("1/r2 [dB]: ", 10 * np.log10(1/r**2))
 print("1/q2 [dB]: ", 10 * np.log10(1/opt_q**2))
@@ -20,19 +22,20 @@ args.lr = 1e-3
 sweep_K = [5] # Taylor Expansion order of state evolution model f
 delta_t = 0.02 # dt passed to the model
 
-wandb.init(project="Hybrid_Inference")
-wandb.log({
-  "learning_rate": args.lr,
-  "gamma": args.gamma,
-  "process_noise_q": opt_q
-})
+# if wandb_switch:
+#     wandb.init(project="Hybrid_Inference_Lorenz")
+#     wandb.log({
+#     "learning_rate": args.lr,
+#     "gamma": args.gamma,
+#     "K": args.K
+#     })
 
 d_utils.init_folders(args.exp_name)
 d_utils.copy_file('exp2_lorenz.py', 'logs/%s/%s' % (args.exp_name, 'exp2_lorenz.py'))
 print(args)
 
-sweep_samples = np.array([2, 5, 10, 20,  50, 100, 200, 500, 1000, 2000, 5000, 10000]) * 10
-epochs_arr = [1, 5, 30, 50, 60, 70, 70, 60, 60, 30, 25, 20]
+sweep_samples = np.array([2]) * 3000
+epochs_arr = [70]
 
 
 def baseline():
@@ -206,6 +209,7 @@ if __name__ == '__main__':
         #         print('')
         d_utils.write_file('logs/%s/%s.txt' % (args.exp_name, key), str(results))
 
-# Close wandb run 
-wandb.finish()
+# # Close wandb run 
+# if wandb_switch:
+#     wandb.finish()
         

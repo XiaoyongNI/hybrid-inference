@@ -15,7 +15,7 @@ else:
 ### Dataset path and noise statistics ###
 #########################################
 wandb_switch = False #True for wandb, False for no wandb
-InitIsRandom = True
+InitIsRandom = True # currently for linear case only
 RotateH = False
 RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
@@ -25,8 +25,8 @@ Test_Loss_OnlyP = False # if True: test loss = MSE(p,p^), else: test loss = MSE(
 
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
 compact_path_linear = 'simulations/Linear/Linear_CA/New_decimated_dt1e-2_T100_r0_randnInit.pt'
-decimation = False # true for decimation case, false for DT case
-compact_path_lor_decimation = "simulations/LA/decimation/decimated_r0_Ttest3000.pt"
+decimation = True # true for decimation case, false for DT case
+compact_path_lor_decimation = "simulations/LA/decimation/data_size/size2.pt"
 compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
 
 # Noise statistics for all cases expect linear CA(linear CA is defined in later part of this file seperately)
@@ -49,25 +49,25 @@ else:
 ########################
 
 # Number of Training Examples
-N_E = 1000
+N_E = 2
 
 # Number of Cross Validation Examples
-N_CV = 100
+N_CV = 5
 
 # Number of Test Examples
-N_T = 200
+N_T = 10
 
 # Sequence Length for Linear case
 T = 100
 T_test = 100
 # Sequence Length for NL lorenz case
-lor_T = 100
-lor_T_test = 100
+lor_T = 3000
+lor_T_test = 3000
 
 # Init condition and delta_t for Lorenz
 m1_x0 = np.array([1., 1., 1.]).astype(np.float32) # initial x0
 m2_x0 = np.diag([1] * 3) * 0 # initial P0
-delta_t = 0.02 # dt that generates the dataset
+delta_t = 1e-5 # dt that generates the dataset
 sample_delta_t = 0.02 # sampling dt
 
 lr_coeff = 1 # the ratio between GM message and GNN message
