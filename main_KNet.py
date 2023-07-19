@@ -12,8 +12,26 @@ from datasets.dataloader import DataLoader
 from utils import generic_utils as g_utils
 from datasets.Extended_data import m1_0, m2_0, CA_m1_0, CA_m2_0, CV_m1_0, CV_m2_0,lor_T, lor_T_test,CV_model,Train_Loss_OnlyP
 
-
 def train_hybrid(args, net, device, train_loader, optimizer, epoch):
+    net.train()
+    stepsxsample = 1.0 * train_loader.dataset.total_len() / (len(train_loader.dataset) + 1e-12)
+    for batch_idx, (ts, position, meas, x0, P0, operators) in enumerate(train_loader):
+        position, meas, x0 = position.to(device), meas.to(device), x0.to(device)
+        operators = g_utils.operators2device(operators, device)
+        optimizer.zero_grad()
+        outputs = net([operators, meas], x0, args.K, ts=ts)
+        mse = F.mse_loss(outputs[-1], position)
+        loss = losses.mse_arr_loss(outputs, position)
+        if meas.size(0) == 1:
+            loss = loss * meas.size(1) / stepsxsample
+        loss.backward()
+        optimizer.step()
+        if batch_idx % args.log_interval == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f} \tMSE: {:.6f}'.format(
+                epoch, batch_idx * len(meas), len(train_loader.dataset),
+                100. * batch_idx / len(train_loader), loss.item(), mse.item()))
+            
+def train_hybrid_CA(args, net, device, train_loader, optimizer, epoch):
     net.train()
     stepsxsample = 1.0 * train_loader.dataset.total_len() / (len(train_loader.dataset) + 1e-12)
     for batch_idx, (ts, position, meas, x0, P0, operators) in enumerate(train_loader):
@@ -78,7 +96,7 @@ def CA_hybrid(args, val_on_train=False, load = True,test_time=False):
             net = torch.load(args.path_results+'best-model.pt', map_location=device)
         except:
             print("Error loading the trained model!!!")
-        test_mse = test.test_gnn_kalman(args, net, device, test_loader, plots=False,test_time=True)
+        test_mse = test.test_gnn_kalman_CA(args, net, device, test_loader, plots=False,test_time=True)
 
         print("Test loss: %.4f" % (test_mse))
         return test_mse.item()
@@ -100,16 +118,16 @@ def CA_hybrid(args, val_on_train=False, load = True,test_time=False):
         #print(net)
         optimizer = optim.Adam(net.parameters(), lr=args.lr)
 
-        min_val = test.test_gnn_kalman(args, net, device, val_loader)
+        min_val = test.test_gnn_kalman_CA(args, net, device, val_loader)
 
         for epoch in range(1, args.epochs + 1):
             #adjust_learning_rate(optimizer, args.lr, epoch)
-            train_hybrid(args, net, device, train_loader, optimizer, epoch)
+            train_hybrid_CA(args, net, device, train_loader, optimizer, epoch)
 
-            val_mse = test.test_gnn_kalman(args, net, device, val_loader)
+            val_mse = test.test_gnn_kalman_CA(args, net, device, val_loader)
             
             if val_on_train:
-                train_mse = test.test_gnn_kalman(args, net, device, train_loader)
+                train_mse = test.test_gnn_kalman_CA(args, net, device, train_loader)
                 val_mse = (val_mse * dataset_val.total_len() + train_mse * dataset_train.total_len())/(dataset_val.total_len() + dataset_train.total_len())
 
             if val_mse < min_val:
