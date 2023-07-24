@@ -37,15 +37,20 @@ class LORENZ(data.Dataset):
                 ### Convert to np array and float64 type
                 train_input = train_input.numpy().astype(np.float64)
                 train_target = train_target.numpy().astype(np.float64)
-                ### Convert to list 
+                ### Convert to list without chopping
                 datalist = []
-                if tr_tt < max_len:
-                    n_e = random.randint(0, N_E - 1)
-                    datalist.append([np.transpose(train_target[n_e,:,0:tr_tt],(1,0)), np.transpose(train_input[n_e,:,0:tr_tt],(1,0))])
-                else:
-                    for i in range(np.minimum(train_target.shape[0],int(tr_tt/max_len))):                   
-                        datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0))])
+                for i in range(train_target.shape[0]):                   
+                    datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0))])
                 self.data = datalist
+                ### Convert to list with potential chopping
+                # datalist = []
+                # if tr_tt < max_len:
+                #     n_e = random.randint(0, N_E - 1)
+                #     datalist.append([np.transpose(train_target[n_e,:,0:tr_tt],(1,0)), np.transpose(train_input[n_e,:,0:tr_tt],(1,0))])
+                # else:
+                #     for i in range(np.minimum(train_target.shape[0],int(tr_tt/max_len))):                   
+                #         datalist.append([np.transpose(train_target[i,:,:],(1,0)), np.transpose(train_input[i,:,:],(1,0))])
+                # self.data = datalist
 
             if self.partition == 'val':
                 ### Convert to np array and float64 type

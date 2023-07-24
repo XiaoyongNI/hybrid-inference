@@ -15,7 +15,7 @@ else:
 ### Dataset path and noise statistics ###
 #########################################
 wandb_switch = False #True for wandb, False for no wandb
-InitIsRandom = True # currently for linear case only
+InitIsRandom = False # currently for linear case only
 RotateH = False
 RotateF = False
 HNL = False #True for Non-linear observation h, False for linear H
@@ -24,13 +24,13 @@ Train_Loss_OnlyP = False # if True: train loss = MSE(p,p^), else: train loss = M
 Test_Loss_OnlyP = False # if True: test loss = MSE(p,p^), else: test loss = MSE(pva,pva^)
 
 # compact_path_linear = "simulations/Linear/Scaling_to_large_models/5x5_rq020_T20.pt" # path to load pre-generated dataset
-compact_path_linear = 'simulations/Linear/Linear_CA/New_decimated_dt1e-2_T100_r0_randnInit.pt'
+compact_path_linear = 'simulations/Linear/exp/2x2_rq-1010_T100.pt'
 decimation = True # true for decimation case, false for DT case
 compact_path_lor_decimation = "simulations/LA/decimation/data_size/size2.pt"
 compact_path_lor_DT = "simulations/LA/DT/T100_Hrot1/data_lor_v20_rq-1010_T100.pt"
 
 # Noise statistics for all cases expect linear CA(linear CA is defined in later part of this file seperately)
-r2 = 1
+r2 = 10
 r = np.sqrt(r2) # lamb
 vdB = -20 # ratio v=q2/r2
 v = 10**(vdB/10)
@@ -49,13 +49,13 @@ else:
 ########################
 
 # Number of Training Examples
-N_E = 2
+N_E = 1000
 
 # Number of Cross Validation Examples
-N_CV = 5
+N_CV = 100
 
 # Number of Test Examples
-N_T = 10
+N_T = 200
 
 # Sequence Length for Linear case
 T = 100

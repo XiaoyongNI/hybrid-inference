@@ -86,7 +86,7 @@ class SYNTHETIC(data.Dataset):
 
                     
             else:
-                [train_input, train_target, cv_input, cv_target, test_input, test_target] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
+                [train_input, train_target, cv_input, cv_target, test_input, test_target,_,_,_] = torch.load(compact_path_linear,map_location=torch.device("cpu"))
                 if CV_model:# set state as (p,v) instead of (p,v,a)
                     train_target = train_target[:,0:CV_m,:]
                     cv_target = cv_target[:,0:CV_m,:]
